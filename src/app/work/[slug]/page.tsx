@@ -1,7 +1,12 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
-import { getAllProjects, getProjectBySlug } from '@/data/projects';
+import {
+  getAllProjects,
+  getProjectBySlug,
+  getProjectCover,
+  getAdjacentProjects,
+} from '@/data/projects';
 import PhotographViewer from '@/components/PhotographViewer';
 import styles from './page.module.css';
 
@@ -22,17 +27,24 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
   if (!project) {
     return {
-      title: 'Project Not Found',
+      title: 'Work Not Found',
     };
   }
 
+  const cover = getProjectCover(project);
+  const description =
+    project.subtitle ||
+    (project.statement && project.statement.length > 0
+      ? project.statement[0]
+      : `${project.title} by Dilkhush Choubey`);
+
   return {
     title: project.title,
-    description: project.subtitle || project.statement[0],
+    description,
     openGraph: {
       title: `${project.title} — Dilkhush Choubey`,
-      description: project.subtitle || project.statement[0],
-      images: [{ url: project.coverImage.src }],
+      description,
+      images: [{ url: cover.src }],
     },
   };
 }
@@ -45,25 +57,22 @@ export default async function ProjectPage({ params }: PageProps) {
     notFound();
   }
 
-  const allProjects = getAllProjects();
-  const currentIndex = allProjects.findIndex((p) => p.slug === project.slug);
-  const prevProject = currentIndex > 0 ? allProjects[currentIndex - 1] : null;
-  const nextProject =
-    currentIndex < allProjects.length - 1 ? allProjects[currentIndex + 1] : null;
+  const { prevProject, nextProject } = getAdjacentProjects(project.slug);
 
   return (
     <article className={styles.article}>
       <Link href="/work" className={styles.backLink}>
-        &larr; Back to Work Index
+        &larr; Back to Work
       </Link>
 
       <header className={styles.header}>
         <div className={styles.metaRow}>
           <span className={styles.kindBadge}>
-            {project.kind === 'series' ? 'Short Series' : 'Major Project'}
+            {project.kind === 'series' ? 'Series' : 'Project'}
           </span>
           <span className={styles.metaDetails}>
-            {project.location} · {project.year}
+            {project.location ? `${project.location} · ` : ''}
+            {project.year}
           </span>
         </div>
 
@@ -71,19 +80,21 @@ export default async function ProjectPage({ params }: PageProps) {
 
         {project.subtitle && <p className={styles.subtitle}>{project.subtitle}</p>}
 
-        <div className={styles.statementBlock}>
-          {project.statement.map((para, index) => (
-            <p key={index} className={styles.statementPara}>
-              {para}
-            </p>
-          ))}
-        </div>
+        {project.statement && project.statement.length > 0 && (
+          <div className={styles.statementBlock}>
+            {project.statement.map((para, index) => (
+              <p key={index} className={styles.statementPara}>
+                {para}
+              </p>
+            ))}
+          </div>
+        )}
       </header>
 
-      <section className={styles.gallerySection} aria-label="Photographs in this Project">
+      <section className={styles.gallerySection} aria-label="Photographs in this Work">
         <div className={styles.galleryHeader}>
-          <span className="meta-stamp">Plates ({project.photographs.length})</span>
-          <span className="meta-stamp">3:2 &amp; 4:3 Original Compositions</span>
+          <span className="meta-stamp">Photographs ({project.photographs.length})</span>
+          <span className="meta-stamp">Original Compositions</span>
         </div>
 
         <div className={styles.galleryList}>
@@ -93,7 +104,7 @@ export default async function ProjectPage({ params }: PageProps) {
         </div>
       </section>
 
-      <nav className={styles.footerNav} aria-label="Adjacent Projects">
+      <nav className={styles.footerNav} aria-label="Adjacent Works">
         {prevProject ? (
           <Link href={`/work/${prevProject.slug}`} className={styles.navPrev}>
             &larr; {prevProject.title}

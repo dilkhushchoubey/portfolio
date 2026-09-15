@@ -27,9 +27,10 @@ export interface Project {
   subtitle?: string;
   kind: ProjectKind;
   year: string;
-  location: string;
-  statement: string[];
-  coverImage: Photograph;
+  dateRange?: string;
+  location?: string;
+  statement?: string[];
+  coverPhotoId: string;
   photographs: Photograph[];
   featured?: boolean;
   order: number;

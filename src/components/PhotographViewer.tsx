@@ -51,6 +51,12 @@ export default function PhotographViewer({ photo, priority = false }: Photograph
             {meta.date && <span className={styles.metaItem}>{meta.date}</span>}
             {meta.date && meta.time && <span className={styles.separator}>·</span>}
             {meta.time && <span className={styles.metaItem}>{meta.time}</span>}
+            {meta.notes && (
+              <>
+                {(meta.location || meta.date || meta.time) && <span className={styles.separator}>·</span>}
+                <span className={styles.metaItem}>{meta.notes}</span>
+              </>
+            )}
           </div>
         )}
       </figcaption>
