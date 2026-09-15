@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1800 1200" width="1800" height="1200">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1a1d20" />
+      <stop offset="60%" stop-color="#2a3138" />
+      <stop offset="100%" stop-color="#1a1d20" />
+    </linearGradient>
+    <radialGradient id="glow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#8898a8" stop-opacity="0.25" />
+      <stop offset="100%" stop-color="#1a1d20" stop-opacity="0" />
+    </radialGradient>
+  </defs>
+  <rect width="1800" height="1200" fill="url(#bgGrad)" />
+  <rect width="1800" height="1200" fill="url(#glow)" />
+  <rect x="32" y="32" width="1736" height="1136" fill="none" stroke="#8898a8" stroke-opacity="0.25" stroke-width="1" />
+  
+  <g font-family="Newsreader, Georgia, serif" fill="#e8e5df" text-anchor="middle">
+    <text x="900" y="570" font-size="34" letter-spacing="1.5" font-weight="300">The Winter Migrants</text>
+    <text x="900" y="620" font-family="Inter, -apple-system, sans-serif" font-size="14" letter-spacing="3" text-transform="uppercase" fill="#a49e94">The Solitary River: Dawn on the Ghats</text>
+    <text x="900" y="655" font-family="Inter, -apple-system, sans-serif" font-size="12" letter-spacing="2" fill="#78736a">Varanasi, India · 2024 · [3:2]</text>
+  </g>
+
+  <g font-family="Inter, -apple-system, sans-serif" font-size="11" letter-spacing="2" fill="#666159">
+    <text x="56" y="1148">DILKHUSH CHOUBEY ARCHIVE</text>
+    <text x="1744" y="1148" text-anchor="end">1800 × 1200 · 3:2</text>
+  </g>
+</svg>
