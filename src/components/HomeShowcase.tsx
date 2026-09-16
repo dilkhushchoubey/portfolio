@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useEffect, useMemo } from 'react';
+import { useState, useRef, useEffect, useMemo, useCallback, Fragment } from 'react';
 import Image from 'next/image';
 import { gsap } from 'gsap';
 import { homepageShowcaseSlides, HomepageSlide } from '@/data/homepageShowcase';
@@ -11,211 +11,147 @@ interface HomeShowcaseProps {
 }
 
 /**
- * CYNX REVERSE-ENGINEERED CONSTANTS
- * MAX_SPEED = 0.22 (normalized slide index units per input step)
- * Expo.out duration = 1.05s
- * 11 cycles of items provide an infinite visual buffer for dynamic recycling
+ * CYNX REPEATED FILMSTRIP & MARBLE MOTIF ARCHITECTURE
+ * Sequence: [STRIPE 1] [STRIPE 2] [STRIPE 3] [LARGE PHOTO] [STRIPE 1] [STRIPE 2] [STRIPE 3] [NEXT PHOTO] ...
+ * Large photos: 6 curated plates from public/homepage/
+ * Stripes: 3 dark marbled fluid ink textures from public/homepage/stripes/
+ * Movement: Continuous horizontal momentum driven by gsap.quickTo
  */
 const MAX_SPEED = 0.22;
 const EASING_DURATION = 1.05;
-const CYCLES = 11;
-const BASE_CYCLE = 5; // Anchor cycle centered at middle (5 cycles left, 5 cycles right)
+const CYCLES = 7;
+const BASE_CYCLE = 3; // Center cycle anchor (3 cycles to left, 3 to right)
+
+const STRIPES = [
+  { id: 's1', src: '/homepage/stripes/stripe-01.jpg' },
+  { id: 's2', src: '/homepage/stripes/stripe-02.jpg' },
+  { id: 's3', src: '/homepage/stripes/stripe-03.jpg' },
+];
 
 export default function HomeShowcase({ slides = homepageShowcaseSlides }: HomeShowcaseProps) {
-  const totalSlides = slides.length;
-  const baseOffsetIndex = BASE_CYCLE * totalSlides;
+  const totalPhotos = slides.length;
+  const baseGroupIndex = BASE_CYCLE * totalPhotos;
 
-  // React state updates ONLY when the active slide index changes
-  const [activeSlideIndex, setActiveSlideIndex] = useState(0);
+  // React state updates ONLY when the active large photo index changes
+  const [activePhotoIndex, setActivePhotoIndex] = useState(0);
 
   const sectionRef = useRef<HTMLElement>(null);
   const stageRef = useRef<HTMLDivElement>(null);
-  const slotRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const trackRef = useRef<HTMLDivElement>(null);
+  const photoRefs = useRef<(HTMLDivElement | null)[]>([]);
 
   // Continuous animation refs
   const listXTargetRef = useRef(0);
   const posRef = useRef({ listX: 0 });
   const xToRef = useRef<((value: number) => void) | null>(null);
   const activeIndexRef = useRef(0);
-  const activeGlobalIndexRef = useRef(baseOffsetIndex);
-  const visibleRangeRef = useRef<{ min: number; max: number } | null>(null);
+  const activeGlobalGroupRef = useRef(baseGroupIndex);
+  const basePhotoCenterRef = useRef(0);
+  const photoPitchRef = useRef(0);
 
   // Drag interaction state
   const isDraggingRef = useRef(false);
   const dragStartXRef = useRef(0);
   const dragStartTargetRef = useRef(0);
 
-  // Generate 11 continuous repeating cycles of slides for infinite buffer
-  const displaySlides = useMemo(() => {
+  // Generate 7 repeating cycles of (1 Photo + 3 Stripes) groups
+  const displayGroups = useMemo(() => {
     return Array.from({ length: CYCLES }, (_, cycleIdx) =>
       slides.map((slide, slideIdx) => ({
-        ...slide,
-        uniqueKey: `cycle-${cycleIdx}-slide-${slideIdx}-${slide.id}`,
+        photo: slide,
         originalIndex: slideIdx,
-        globalIndex: cycleIdx * totalSlides + slideIdx,
+        globalGroupIndex: cycleIdx * totalPhotos + slideIdx,
+        uniqueKey: `cycle-${cycleIdx}-photo-${slideIdx}-${slide.id}`,
       }))
     ).flat();
-  }, [slides, totalSlides]);
+  }, [slides, totalPhotos]);
 
-  // Main GSAP quickTo continuous engine & Cynx filmstrip geometry
+  // Measure rendered geometry directly from the DOM
+  const updateMeasurements = useCallback(() => {
+    const basePhoto = photoRefs.current[baseGroupIndex];
+    const nextPhoto = photoRefs.current[baseGroupIndex + 1];
+    if (!basePhoto) return;
+
+    basePhotoCenterRef.current = basePhoto.offsetLeft + basePhoto.offsetWidth / 2;
+
+    if (nextPhoto) {
+      photoPitchRef.current = nextPhoto.offsetLeft - basePhoto.offsetLeft;
+    } else {
+      // Fallback calculation: photo width + 3 stripes + 4 gaps (gap = 24px)
+      const gap = window.innerWidth < 768 ? 12 : 24;
+      photoPitchRef.current = basePhoto.offsetWidth + 3 * 88 + 4 * gap;
+    }
+  }, [baseGroupIndex]);
+
+  // Apply continuous hardware-accelerated translation
+  const applyTransform = useCallback(() => {
+    const track = trackRef.current;
+    if (!track) return;
+
+    const viewportCenter = window.innerWidth / 2;
+    const baseCenter = basePhotoCenterRef.current;
+    const pitch = photoPitchRef.current;
+    const currentL = posRef.current.listX;
+
+    // Translate track so that the active large photo aligns with sub-pixel precision at viewport center
+    const trackX = viewportCenter - (baseCenter + currentL * pitch);
+    gsap.set(track, { x: trackX, force3D: true });
+  }, []);
+
+  // Main GSAP quickTo continuous engine
   useEffect(() => {
+    const track = trackRef.current;
     const stage = stageRef.current;
-    if (!stage) return;
+    if (!track || !stage) return;
 
-    /**
-     * Cynx Filmstrip Layout Calculation:
-     * - Central dominant active image (native 3:2 proportion, ~55vh height, 6 cols of 12-col grid)
-     * - Narrow surrounding photographic columns (1 col of 12-col grid, identical 55vh height)
-     * - Constant 24px horizontal gaps everywhere
-     * - Continuous smooth cosine interpolation of widths between active and side states
-     */
-    const applyLayout = () => {
-      const stageEl = stageRef.current;
-      if (!stageEl) return;
+    updateMeasurements();
+    applyTransform();
 
-      const viewportWidth = window.innerWidth;
-      const viewportHeight = window.innerHeight;
-      const viewportCenter = viewportWidth / 2;
-      const isMobile = viewportWidth < 768;
-      const gap = isMobile ? 12 : 24;
-
-      // 55vh on desktop, 48vh on mobile
-      const stripHeight = isMobile
-        ? Math.min(380, Math.max(260, viewportHeight * 0.48))
-        : Math.min(560, Math.max(320, viewportHeight * 0.55));
-
-      // Active image width: 6 columns of 12-col grid (~52% of viewport width, 3:2 landscape)
-      const activeWidth = isMobile
-        ? Math.min(viewportWidth * 0.78, 360)
-        : Math.min(Math.min(780, stripHeight * 1.5), viewportWidth * 0.52);
-
-      // Narrow side columns: 1 column of 12-col grid (~80-88px on desktop)
-      const sideWidth = isMobile
-        ? Math.max(36, Math.min(52, viewportWidth * 0.12))
-        : Math.max(68, Math.min(92, (viewportWidth - 112 - 11 * gap) / 12));
-
-      const currentL = posRef.current.listX;
-      const continuousCenter = baseOffsetIndex + currentL;
-      const M = Math.floor(continuousCenter);
-      const lambda = continuousCenter - M;
-
-      // Cosine smooth width interpolation based on continuous distance from active focus
-      const getWidth = (e: number) => {
-        const d = Math.abs(e);
-        if (d >= 1) return sideWidth;
-        const s = (1 + Math.cos(Math.PI * d)) / 2;
-        return sideWidth + (activeWidth - sideWidth) * s;
-      };
-
-      // Compute widths and center offsets for visible window [M - 6, M + 6]
-      const minK = Math.max(0, M - 6);
-      const maxK = Math.min(displaySlides.length - 1, M + 6);
-
-      const w: { [k: number]: number } = {};
-      const h: { [k: number]: number } = {};
-
-      for (let k = minK; k <= maxK; k++) {
-        w[k] = getWidth(k - continuousCenter);
-      }
-
-      const pitchM = (w[M] + (w[M + 1] ?? sideWidth)) / 2 + gap;
-      h[M] = -lambda * pitchM;
-      if (M + 1 <= maxK) {
-        h[M + 1] = (1 - lambda) * pitchM;
-      }
-
-      for (let k = M + 2; k <= maxK; k++) {
-        h[k] = h[k - 1] + (w[k - 1] + w[k]) / 2 + gap;
-      }
-      for (let k = M - 1; k >= minK; k--) {
-        h[k] = h[k + 1] - (w[k] + w[k + 1]) / 2 - gap;
-      }
-
-      // Hide slots that moved out of visible window
-      const prevRange = visibleRangeRef.current;
-      visibleRangeRef.current = { min: minK, max: maxK };
-
-      if (prevRange) {
-        for (let k = prevRange.min; k < minK; k++) {
-          const slot = slotRefs.current[k];
-          if (slot) {
-            slot.style.opacity = '0';
-            slot.style.pointerEvents = 'none';
-          }
-        }
-        for (let k = maxK + 1; k <= prevRange.max; k++) {
-          const slot = slotRefs.current[k];
-          if (slot) {
-            slot.style.opacity = '0';
-            slot.style.pointerEvents = 'none';
-          }
-        }
-      }
-
-      // Position all active window slots
-      for (let k = minK; k <= maxK; k++) {
-        const slot = slotRefs.current[k];
-        if (!slot) continue;
-
-        const width = w[k];
-        const left = viewportCenter + h[k] - width / 2;
-        const isCenterSlot = Math.abs(k - continuousCenter) < 0.5;
-
-        slot.style.transform = `translate3d(${left.toFixed(2)}px, 0, 0)`;
-        slot.style.width = `${width.toFixed(2)}px`;
-        slot.style.height = `${stripHeight.toFixed(2)}px`;
-        slot.style.opacity = '1';
-        slot.style.pointerEvents = 'auto';
-        slot.style.zIndex = isCenterSlot ? '3' : '1';
-      }
-    };
-
-    // Initialize GSAP quickTo continuous engine
     const xTo = gsap.quickTo(posRef.current, 'listX', {
       duration: EASING_DURATION,
       ease: 'expo.out',
       onUpdate: () => {
-        // 1. Update Cynx filmstrip geometry
-        applyLayout();
+        // 1. Continuous GPU track translation
+        applyTransform();
 
-        // 2. Active slide detection & metadata synchronization
+        // 2. Active large photo detection
         const rawOffset = posRef.current.listX;
-        const normalizedIndex = ((Math.round(rawOffset) % totalSlides) + totalSlides) % totalSlides;
-        const currentGlobalIndex = baseOffsetIndex + Math.round(rawOffset);
+        const normalizedIndex = ((Math.round(rawOffset) % totalPhotos) + totalPhotos) % totalPhotos;
+        const currentGlobalGroup = baseGroupIndex + Math.round(rawOffset);
 
-        if (currentGlobalIndex !== activeGlobalIndexRef.current) {
-          const prevSlot = slotRefs.current[activeGlobalIndexRef.current];
-          const newSlot = slotRefs.current[currentGlobalIndex];
-          if (prevSlot) prevSlot.classList.remove(styles.slideActive);
-          if (newSlot) newSlot.classList.add(styles.slideActive);
-          activeGlobalIndexRef.current = currentGlobalIndex;
+        if (currentGlobalGroup !== activeGlobalGroupRef.current) {
+          const prevEl = photoRefs.current[activeGlobalGroupRef.current];
+          const nextEl = photoRefs.current[currentGlobalGroup];
+          if (prevEl) prevEl.classList.remove(styles.photoActive);
+          if (nextEl) nextEl.classList.add(styles.photoActive);
+          activeGlobalGroupRef.current = currentGlobalGroup;
         }
 
         if (normalizedIndex !== activeIndexRef.current) {
           activeIndexRef.current = normalizedIndex;
-          setActiveSlideIndex(normalizedIndex);
+          setActivePhotoIndex(normalizedIndex);
         }
       },
     });
 
     xToRef.current = xTo;
 
-    // Initial render layout
-    applyLayout();
-    const initialSlot = slotRefs.current[baseOffsetIndex];
-    if (initialSlot) initialSlot.classList.add(styles.slideActive);
+    // Initial class sync
+    const initialPhoto = photoRefs.current[baseGroupIndex];
+    if (initialPhoto) initialPhoto.classList.add(styles.photoActive);
 
     const handleResize = () => {
-      applyLayout();
+      updateMeasurements();
+      applyTransform();
     };
 
     window.addEventListener('resize', handleResize);
     return () => {
       window.removeEventListener('resize', handleResize);
     };
-  }, [baseOffsetIndex, totalSlides, displaySlides.length]);
+  }, [baseGroupIndex, totalPhotos, updateMeasurements, applyTransform]);
 
-  // Continuous wheel interaction with Cynx velocity scaling
+  // Continuous wheel interaction with Cynx velocity scaling (only over hero stage)
   useEffect(() => {
     const stage = stageRef.current;
     if (!stage) return;
@@ -228,10 +164,10 @@ export default function HomeShowcase({ slides = homepageShowcaseSlides }: HomeSh
 
       // Cynx velocity scaling: smoother resistance as target diverges
       const currentSpread = Math.abs(listXTargetRef.current - posRef.current.listX);
-      const denominator = 320 + Math.min(300, currentSpread * 180);
+      const denominator = 360 + Math.min(300, currentSpread * 180);
       const step = normalizedDelta / denominator;
 
-      // Clamp step to Cynx MAX_SPEED (0.22)
+      // Clamp step to Cynx MAX_SPEED
       const clampedStep = Math.max(-MAX_SPEED, Math.min(MAX_SPEED, step));
 
       listXTargetRef.current += clampedStep;
@@ -247,7 +183,7 @@ export default function HomeShowcase({ slides = homepageShowcaseSlides }: HomeSh
     };
   }, []);
 
-  // Pointer drag direct manipulation
+  // Pointer drag manipulation
   const handlePointerDown = (e: React.PointerEvent) => {
     if (e.button !== 0) return;
     isDraggingRef.current = true;
@@ -259,8 +195,8 @@ export default function HomeShowcase({ slides = homepageShowcaseSlides }: HomeSh
   const handlePointerMove = (e: React.PointerEvent) => {
     if (!isDraggingRef.current) return;
     const deltaX = e.clientX - dragStartXRef.current;
-    // Drag pitch calibrated to smooth side column width + gap (~108px)
-    const slideDelta = -deltaX / 108;
+    const pitch = photoPitchRef.current || 1000;
+    const slideDelta = -deltaX / pitch;
     listXTargetRef.current = dragStartTargetRef.current + slideDelta;
 
     if (xToRef.current) {
@@ -278,15 +214,15 @@ export default function HomeShowcase({ slides = homepageShowcaseSlides }: HomeSh
     }
   };
 
-  // Click on any visible side column to center it smoothly
-  const handleSlideClick = (globalIdx: number) => {
-    listXTargetRef.current = globalIdx - baseOffsetIndex;
+  // Click on any large photograph to center it smoothly
+  const handlePhotoClick = (globalGroupIdx: number) => {
+    listXTargetRef.current = globalGroupIdx - baseGroupIndex;
     if (xToRef.current) {
       xToRef.current(listXTargetRef.current);
     }
   };
 
-  // Keyboard arrow navigation
+  // Keyboard navigation
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
@@ -304,7 +240,7 @@ export default function HomeShowcase({ slides = homepageShowcaseSlides }: HomeSh
   }, []);
 
   // Active photograph metadata
-  const currentSlide = slides[activeSlideIndex] ?? slides[0];
+  const currentPhoto = slides[activePhotoIndex] ?? slides[0];
 
   return (
     <section
@@ -321,47 +257,78 @@ export default function HomeShowcase({ slides = homepageShowcaseSlides }: HomeSh
         onPointerUp={handlePointerUp}
         onPointerCancel={handlePointerUp}
       >
-        {displaySlides.map((item, idx) => {
-          const isBaseInitialActive = idx === baseOffsetIndex;
+        <div ref={trackRef} className={styles.track}>
+          {displayGroups.map((group, groupIdx) => {
+            const isBaseInitialActive = groupIdx === baseGroupIndex;
 
-          return (
-            <div
-              key={item.uniqueKey}
-              ref={(el) => {
-                slotRefs.current[idx] = el;
-              }}
-              className={`${styles.slide} ${isBaseInitialActive ? styles.slideActive : ''}`}
-              onClick={() => handleSlideClick(idx)}
-              aria-label={`View photograph ${item.originalIndex + 1}`}
-            >
-              <div className={styles.imageWrapper}>
-                <Image
-                  src={item.src}
-                  alt={item.alt}
-                  fill
-                  sizes="(max-width: 768px) 78vw, 780px"
-                  priority={idx >= baseOffsetIndex - 1 && idx <= baseOffsetIndex + 1}
-                  className={styles.image}
-                />
-              </div>
-            </div>
-          );
-        })}
+            return (
+              <Fragment key={group.uniqueKey}>
+                {/* 1. Large Editorial Photograph */}
+                <div
+                  ref={(el) => {
+                    photoRefs.current[groupIdx] = el;
+                  }}
+                  className={`${styles.photoCard} ${isBaseInitialActive ? styles.photoActive : ''}`}
+                  style={{
+                    width: 'clamp(420px, calc(55vh * 1.5), 780px)',
+                    height: 'clamp(320px, 55vh, 560px)',
+                  }}
+                  onClick={() => handlePhotoClick(groupIdx)}
+                  aria-label={`View photograph: ${group.photo.title}`}
+                >
+                  <div className={styles.imageFrame}>
+                    <Image
+                      src={group.photo.src}
+                      alt={group.photo.alt}
+                      fill
+                      sizes="(max-width: 768px) 78vw, 780px"
+                      priority={groupIdx >= baseGroupIndex - 1 && groupIdx <= baseGroupIndex + 1}
+                      className={styles.photoImage}
+                    />
+                  </div>
+                </div>
+
+                {/* 2. Three Dark Marbled Vertical Stripes Separator Motif */}
+                {STRIPES.map((stripe, sIdx) => (
+                  <div
+                    key={`${group.uniqueKey}-stripe-${sIdx}`}
+                    className={styles.stripeCard}
+                    style={{
+                      width: 'clamp(64px, 5.8vw, 88px)',
+                      height: 'clamp(320px, 55vh, 560px)',
+                    }}
+                    aria-hidden="true"
+                  >
+                    <div className={styles.stripeFrame}>
+                      <Image
+                        src={stripe.src}
+                        alt=""
+                        fill
+                        sizes="100px"
+                        className={styles.stripeImage}
+                      />
+                    </div>
+                  </div>
+                ))}
+              </Fragment>
+            );
+          })}
+        </div>
       </div>
 
       {/* Editorial Details Row: Positioned cleanly below the film strip */}
       <div className={styles.infoArea}>
         <div className={styles.infoContent}>
           <div className={styles.infoLeft}>
-            <span className={styles.photoTitle}>{currentSlide.title}</span>
+            <span className={styles.photoTitle}>{currentPhoto.title}</span>
             <span className={styles.photoMeta}>
-              {currentSlide.year} — {currentSlide.location}
+              {currentPhoto.year} — {currentPhoto.location}
             </span>
           </div>
           <div className={styles.infoRight}>
             <div className={styles.counter}>
-              <span>{String(activeSlideIndex + 1).padStart(2, '0')}</span>
-              <span>{String(totalSlides).padStart(2, '0')}</span>
+              <span>{String(activePhotoIndex + 1).padStart(2, '0')}</span>
+              <span>{String(totalPhotos).padStart(2, '0')}</span>
             </div>
             <div className={styles.filmIndicator} aria-hidden="true">
               <span className={styles.filmBar} />

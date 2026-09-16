@@ -1,5 +1,5 @@
 /* ==========================================================================
-   HOMEPAGE SHOWCASE — CYNX-STYLE EDITORIAL PHOTOGRAPHIC FILM STRIP
+   HOMEPAGE HERO SHOWCASE — CYNX REPEATED FILMSTRIP & MARBLE MOTIF
    ========================================================================== */
 
 .showcaseSection {
@@ -12,54 +12,55 @@
   align-items: center;
   user-select: none;
   -webkit-user-select: none;
-  touch-action: pan-y;
-  /* Generous breathing room below header — filmstrip sits in center viewport */
+  /* Substantial breathing room below navigation — strip sits centered in viewport */
   padding-top: clamp(48px, 9vh, 96px);
   padding-bottom: clamp(32px, 6vh, 64px);
   box-sizing: border-box;
 }
 
-/* Outer Stage: Full viewport width horizontal canvas */
+/* Outer Stage: Full viewport width horizontal viewport */
 .stageContainer {
   position: relative;
   width: 100vw;
-  height: clamp(320px, 55vh, 560px);
   margin-left: calc(50% - 50vw);
   margin-right: calc(50% - 50vw);
   overflow: hidden;
   cursor: grab;
+  touch-action: pan-y;
 }
 
 .stageContainer:active {
   cursor: grabbing;
 }
 
-/* Individual Slide Slot: Positioned by GSAP transform */
-.slide {
-  position: absolute;
-  top: 0;
-  left: 0;
-  height: 100%;
-  will-change: transform, width, opacity;
-  box-sizing: border-box;
-  opacity: 0;
-  pointer-events: none;
+/* Horizontal Track: Single continuous flex row driven by GSAP quickTo */
+.track {
+  display: flex;
+  align-items: center;
+  width: max-content;
+  gap: 24px;
+  will-change: transform;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* Large Photographic Card */
+.photoCard {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   cursor: pointer;
+  box-sizing: border-box;
+  will-change: transform, opacity;
+  transition: opacity 0.2s ease-out;
 }
 
-.slideVisible {
-  opacity: 1;
-  pointer-events: auto;
-}
-
-/* Active Center Slide: Highest stacking order */
-.slideActive {
-  z-index: 3;
+.photoActive {
   cursor: default;
 }
 
-/* Image Wrapper: Strict editorial containment, no borders, no rounded corners, no shadows */
-.imageWrapper {
+.imageFrame {
   position: relative;
   width: 100%;
   height: 100%;
@@ -67,14 +68,42 @@
   overflow: hidden;
 }
 
-/* Photograph: Fills slot preserving native photographic composition */
-.image {
+.photoImage {
   width: 100%;
   height: 100%;
   object-fit: cover;
   object-position: center;
   display: block;
   pointer-events: none;
+}
+
+/* Dark Marbled Vertical Stripe */
+.stripeCard {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  pointer-events: none;
+  user-select: none;
+}
+
+.stripeFrame {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  background-color: #0c0c0c;
+  overflow: hidden;
+}
+
+.stripeImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  display: block;
+  pointer-events: none;
+  filter: contrast(1.08) brightness(0.96);
 }
 
 /* Information Area: Clean editorial row positioned beneath the film strip */
@@ -159,8 +188,8 @@
     padding-bottom: 32px;
   }
 
-  .stageContainer {
-    height: clamp(260px, 48vh, 380px);
+  .track {
+    gap: 12px;
   }
 
   .infoArea {
