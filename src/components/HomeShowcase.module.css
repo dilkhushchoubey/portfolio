@@ -118,7 +118,7 @@
   opacity: 0.75;
 }
 
-.projectTitle {
+.photoTitle {
   font-family: var(--font-serif);
   font-size: clamp(1.15rem, 1.8vw, 1.45rem);
   font-weight: 300;
