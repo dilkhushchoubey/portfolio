@@ -288,7 +288,7 @@ export default function MasonryPortfolio() {
         className={styles.masonryList}
         style={{ height: totalHeight > 0 ? `${totalHeight}px` : '800px' }}
       >
-        {gridItems.map((item) => (
+        {gridItems.map((item, index) => (
           <div
             key={item.id}
             ref={(el) => {
@@ -309,7 +309,7 @@ export default function MasonryPortfolio() {
                 fill
                 sizes="(max-width: 680px) 100vw, (max-width: 1024px) 66vw, 50vw"
                 className={styles.itemImage}
-                priority={parseInt(item.id, 10) <= 4}
+                priority={index < 6}
               />
               <div className={styles.overlayInfo}>
                 <span className={styles.categoryBadge}>{item.category}</span>
