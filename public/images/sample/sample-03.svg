@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1800 1200" width="1800" height="1200">
+  <defs>
+    <linearGradient id="g03" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1b1714" />
+      <stop offset="50%" stop-color="#2c241e" />
+      <stop offset="100%" stop-color="#1b1714" />
+    </linearGradient>
+    <radialGradient id="r03" cx="50%" cy="50%" r="55%">
+      <stop offset="0%" stop-color="#8f6749" stop-opacity="0.25" />
+      <stop offset="70%" stop-color="#1b1714" stop-opacity="0.0" />
+    </radialGradient>
+  </defs>
+  <rect width="1800" height="1200" fill="url(#g03)" />
+  <rect width="1800" height="1200" fill="url(#r03)" />
+  
+  <!-- Archival Framing Guide -->
+  <rect x="48" y="48" width="1704" height="1104" fill="none" stroke="#e8e5df" stroke-opacity="0.12" stroke-width="1" />
+  <line x1="900" y1="48" x2="900" y2="72" stroke="#e8e5df" stroke-opacity="0.22" stroke-width="1" />
+  <line x1="900" y1="1128" x2="900" y2="1152" stroke="#e8e5df" stroke-opacity="0.22" stroke-width="1" />
+  
+  <!-- Center Specimen Content -->
+  <g font-family="Newsreader, Georgia, serif" fill="#e8e5df" text-anchor="middle">
+    <text x="900" y="560" font-size="44" letter-spacing="2" font-weight="300">SAMPLE PLATE 03</text>
+  </g>
+  <g font-family="Inter, -apple-system, sans-serif" text-anchor="middle" fill="#9c968c">
+    <text x="900" y="616" font-size="13" letter-spacing="4" text-transform="uppercase">Visual Showcase Prototype · Plate III</text>
+    <text x="900" y="648" font-size="11" letter-spacing="2.5" fill="#6e6a62">1800 × 1200 · SPECIMEN SEQUENCE 03/06</text>
+  </g>
+  
+  <!-- Corner Coordinates -->
+  <g font-family="Inter, -apple-system, sans-serif" font-size="10" letter-spacing="2" fill="#58544c">
+    <text x="72" y="1124">TEST ASSET 03</text>
+    <text x="1728" y="1124" text-anchor="end">DILKHUSH CHOUBEY ARCHIVE</text>
+  </g>
+</svg>

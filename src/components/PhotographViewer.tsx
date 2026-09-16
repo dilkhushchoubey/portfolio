@@ -8,26 +8,15 @@ interface PhotographViewerProps {
 }
 
 export default function PhotographViewer({ photo, priority = false }: PhotographViewerProps) {
-  const getRatioClass = (ratio: string) => {
-    switch (ratio) {
-      case '4:3':
-        return styles.ratio4x3;
-      case '16:9':
-        return styles.ratio16x9;
-      case '1:1':
-        return styles.ratio1x1;
-      case '3:2':
-      default:
-        return styles.ratio3x2;
-    }
-  };
-
   const meta = photo.metadata;
-  const hasMeta = meta && (meta.location || meta.date || meta.time);
+  const hasMeta = meta && (meta.location || meta.date || meta.time || meta.notes);
 
   return (
     <figure className={styles.container}>
-      <div className={`${styles.frame} ${getRatioClass(photo.aspectRatio)}`}>
+      <div
+        className={styles.frame}
+        style={{ aspectRatio: `${photo.width} / ${photo.height}` }}
+      >
         <Image
           src={photo.src}
           alt={photo.alt}
@@ -35,31 +24,35 @@ export default function PhotographViewer({ photo, priority = false }: Photograph
           height={photo.height}
           priority={priority}
           className={styles.image}
-          sizes="(max-width: 900px) 100vw, 1200px"
+          sizes="(max-width: 900px) 100vw, 1360px"
         />
       </div>
 
-      <figcaption className={styles.captionBar}>
-        {photo.title && <span className={styles.photoTitle}>{photo.title}</span>}
+      {(photo.title || hasMeta) && (
+        <figcaption className={styles.captionBar}>
+          {photo.title ? <span className={styles.photoTitle}>{photo.title}</span> : <span />}
 
-        {hasMeta && (
-          <div className={styles.metadata}>
-            {meta.location && <span className={styles.metaItem}>{meta.location}</span>}
-            {meta.location && (meta.date || meta.time) && (
-              <span className={styles.separator}>·</span>
-            )}
-            {meta.date && <span className={styles.metaItem}>{meta.date}</span>}
-            {meta.date && meta.time && <span className={styles.separator}>·</span>}
-            {meta.time && <span className={styles.metaItem}>{meta.time}</span>}
-            {meta.notes && (
-              <>
-                {(meta.location || meta.date || meta.time) && <span className={styles.separator}>·</span>}
-                <span className={styles.metaItem}>{meta.notes}</span>
-              </>
-            )}
-          </div>
-        )}
-      </figcaption>
+          {hasMeta && (
+            <div className={styles.metadata}>
+              {meta.location && <span className={styles.metaItem}>{meta.location}</span>}
+              {meta.location && (meta.date || meta.time) && (
+                <span className={styles.separator}>·</span>
+              )}
+              {meta.date && <span className={styles.metaItem}>{meta.date}</span>}
+              {meta.date && meta.time && <span className={styles.separator}>·</span>}
+              {meta.time && <span className={styles.metaItem}>{meta.time}</span>}
+              {meta.notes && (
+                <>
+                  {(meta.location || meta.date || meta.time) && (
+                    <span className={styles.separator}>·</span>
+                  )}
+                  <span className={styles.metaItem}>{meta.notes}</span>
+                </>
+              )}
+            </div>
+          )}
+        </figcaption>
+      )}
     </figure>
   );
 }

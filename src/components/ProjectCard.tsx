@@ -11,18 +11,21 @@ interface ProjectCardProps {
 
 export default function ProjectCard({ project, priority = false }: ProjectCardProps) {
   const cover = getProjectCover(project);
-  const ratioClass = cover.aspectRatio === '4:3' ? styles.ratio4x3 : styles.ratio3x2;
 
   return (
     <article className={styles.card}>
       <Link href={`/work/${project.slug}`} aria-label={`View project: ${project.title}`}>
-        <div className={styles.header}>
+        <header className={styles.header}>
           <h2 className={styles.title}>{project.title}</h2>
           <span className={styles.meta}>
             {project.location ? `${project.location} · ` : ''}{project.year}
           </span>
-        </div>
-        <div className={`${styles.imageFrame} ${ratioClass}`}>
+        </header>
+
+        <div
+          className={styles.imageFrame}
+          style={{ aspectRatio: `${cover.width} / ${cover.height}` }}
+        >
           <Image
             src={cover.src}
             alt={cover.alt}
@@ -30,7 +33,7 @@ export default function ProjectCard({ project, priority = false }: ProjectCardPr
             height={cover.height}
             priority={priority}
             className={styles.image}
-            sizes="(max-width: 900px) 100vw, 1200px"
+            sizes="(max-width: 900px) 100vw, 1360px"
           />
         </div>
       </Link>

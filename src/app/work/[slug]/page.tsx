@@ -58,6 +58,7 @@ export default async function ProjectPage({ params }: PageProps) {
   }
 
   const { prevProject, nextProject } = getAdjacentProjects(project.slug);
+  const isKumartuli = project.id === 'kumartuli';
 
   return (
     <article className={styles.article}>
@@ -66,21 +67,21 @@ export default async function ProjectPage({ params }: PageProps) {
       </Link>
 
       <header className={styles.header}>
+        <h1 className={styles.title}>{project.title}</h1>
+
         <div className={styles.metaRow}>
-          <span className={styles.kindBadge}>
-            {project.kind === 'series' ? 'Series' : 'Project'}
-          </span>
           <span className={styles.metaDetails}>
             {project.location ? `${project.location} · ` : ''}
             {project.year}
           </span>
+          {project.kind === 'series' && (
+            <span className={styles.kindBadge}>Series</span>
+          )}
         </div>
-
-        <h1 className={styles.title}>{project.title}</h1>
 
         {project.subtitle && <p className={styles.subtitle}>{project.subtitle}</p>}
 
-        {project.statement && project.statement.length > 0 && (
+        {project.statement && project.statement.length > 0 && !isKumartuli && (
           <div className={styles.statementBlock}>
             {project.statement.map((para, index) => (
               <p key={index} className={styles.statementPara}>
@@ -93,7 +94,7 @@ export default async function ProjectPage({ params }: PageProps) {
 
       <section className={styles.gallerySection} aria-label="Photographs in this Work">
         <div className={styles.galleryHeader}>
-          <span className="meta-stamp">Photographs ({project.photographs.length})</span>
+          <span className="meta-stamp">Plates ({project.photographs.length})</span>
           <span className="meta-stamp">Original Compositions</span>
         </div>
 
@@ -103,6 +104,18 @@ export default async function ProjectPage({ params }: PageProps) {
           ))}
         </div>
       </section>
+
+      {project.statement && project.statement.length > 0 && isKumartuli && (
+        <section className={styles.statementSection} aria-label="Project Statement">
+          <div className={styles.statementBlock}>
+            {project.statement.map((para, index) => (
+              <p key={index} className={styles.statementPara}>
+                {para}
+              </p>
+            ))}
+          </div>
+        </section>
+      )}
 
       <nav className={styles.footerNav} aria-label="Adjacent Works">
         {prevProject ? (

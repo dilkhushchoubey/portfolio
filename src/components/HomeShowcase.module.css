@@ -1,0 +1,206 @@
+.showcaseSection {
+  position: relative;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: pan-y;
+}
+
+/* Outer Stage Container: Cleans whitespace and strictly prevents horizontal document overflow */
+.stageContainer {
+  position: relative;
+  width: 100vw;
+  margin-left: calc(50% - 50vw);
+  margin-right: calc(50% - 50vw);
+  overflow: hidden;
+  padding: 32px 0 20px;
+  cursor: grab;
+}
+
+.stageContainer:active {
+  cursor: grabbing;
+}
+
+/* Horizontal Track: GSAP Hardware-Accelerated Continuous Stage */
+.track {
+  display: flex;
+  align-items: center;
+  width: max-content;
+  /* Cynx desktop gap = 24px */
+  gap: 24px;
+  will-change: transform;
+  user-select: none;
+  -webkit-user-select: none;
+  /* CRITICAL: No CSS transition on transform — GSAP quickTo has sole authority */
+}
+
+/* Individual Slide: Base slot sized so 5 photographs form a continuous film strip */
+.slide {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: clamp(220px, 34vh, 320px);
+  aspect-ratio: 3 / 2;
+  opacity: 0.82;
+  transform: scale(1);
+  transform-origin: center center;
+  will-change: transform, opacity;
+  position: relative;
+  z-index: 1;
+  cursor: pointer;
+}
+
+/* Active Center Slide: Highest stacking order when scaled to dominant focal size */
+.slideActive {
+  z-index: 2;
+  cursor: default;
+}
+
+/* Photographic Frame: Strict native proportions, zero borders, zero shadows */
+.frame {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  background-color: var(--bg-secondary);
+  overflow: hidden;
+}
+
+/* Image: Never crop, preserve native composition */
+.image {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+  pointer-events: none;
+}
+
+/* Stable Information Area: Centered directly below the active photograph */
+.infoArea {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  margin-top: 24px;
+  padding: 0 var(--gutter-desktop);
+  box-sizing: border-box;
+}
+
+.infoContent {
+  width: 100%;
+  /* Geometrically aligned with the active center photograph width */
+  max-width: clamp(380px, calc(42vh * 1.5 * 1.30), 660px);
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 16px;
+  box-sizing: border-box;
+}
+
+.infoLeft {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  min-width: 0;
+}
+
+.projectTitleLink {
+  text-decoration: none;
+  color: inherit;
+  display: inline-flex;
+  align-items: baseline;
+  transition: opacity var(--transition-subtle);
+}
+
+.projectTitleLink:hover {
+  opacity: 0.75;
+}
+
+.projectTitle {
+  font-family: var(--font-serif);
+  font-size: clamp(1.15rem, 1.8vw, 1.45rem);
+  font-weight: 300;
+  letter-spacing: -0.015em;
+  color: var(--text-primary);
+  line-height: 1.25;
+}
+
+.infoRight {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.locationYear,
+.counter {
+  font-family: var(--font-sans);
+  font-size: 0.72rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.separator {
+  color: var(--text-muted);
+  opacity: 0.45;
+  font-size: 0.72rem;
+}
+
+/* Tablet & Smaller Screens */
+@media (max-width: 900px) {
+  .stageContainer {
+    padding: 24px 0 16px;
+  }
+
+  .slide {
+    height: clamp(200px, 36vh, 320px);
+  }
+
+  .infoArea {
+    margin-top: 18px;
+    padding: 0 var(--gutter-tablet);
+  }
+
+  .infoContent {
+    max-width: clamp(320px, calc(36vh * 1.5 * 1.30), 540px);
+  }
+}
+
+/* Mobile Screens: Cynx mobile gap = 12px */
+@media (max-width: 640px) {
+  .stageContainer {
+    padding: 16px 0 12px;
+  }
+
+  .track {
+    gap: 12px;
+  }
+
+  .slide {
+    height: clamp(170px, 30vh, 240px);
+  }
+
+  .infoArea {
+    margin-top: 14px;
+    padding: 0 var(--gutter-mobile);
+  }
+
+  .infoContent {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+    max-width: 100%;
+  }
+
+  .projectTitle {
+    font-size: 1.15rem;
+  }
+
+  .locationYear,
+  .counter {
+    font-size: 0.68rem;
+  }
+}
