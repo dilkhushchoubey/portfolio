@@ -1,0 +1,261 @@
+/* ==========================================================================
+   MINIMALIST PHOTOGRAPHER MASONRY PORTFOLIO — STITCH MCP
+   ========================================================================== */
+
+.container {
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 24px var(--gutter-desktop) 64px;
+  box-sizing: border-box;
+}
+
+/* Header / Controls Toolbar */
+.toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 32px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.filterGroup {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.filterChip {
+  font-family: var(--font-sans);
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding: 6px 14px;
+  border-radius: 9999px;
+  border: 1px solid transparent;
+  background-color: var(--bg-secondary);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all var(--transition-subtle);
+}
+
+.filterChip:hover {
+  background-color: #e8e6e1;
+  color: var(--text-primary);
+}
+
+.filterChipActive {
+  background-color: var(--text-primary) !important;
+  color: #ffffff !important;
+}
+
+.actionGroup {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.shuffleBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  font-family: var(--font-sans);
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  border-radius: 9999px;
+  border: 1px solid var(--border-strong);
+  background-color: transparent;
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: all var(--transition-subtle);
+}
+
+.shuffleBtn:hover {
+  background-color: var(--bg-secondary);
+  border-color: var(--text-primary);
+}
+
+.shuffleBtn:active {
+  transform: scale(0.96);
+}
+
+.shuffleIcon {
+  width: 14px;
+  height: 14px;
+}
+
+/* Masonry List Container */
+.masonryList {
+  position: relative;
+  width: 100%;
+  min-height: 800px;
+  transition: height 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  margin-bottom: 64px;
+}
+
+/* Individual Item Wrapper */
+.itemWrapper {
+  position: absolute;
+  top: 0;
+  left: 0;
+  padding: 8px;
+  box-sizing: border-box;
+  will-change: transform, width, height, opacity;
+  cursor: pointer;
+}
+
+/* Item Inner Card */
+.itemInner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  border-radius: 12px;
+  overflow: hidden;
+  background-color: var(--bg-secondary);
+  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.08);
+  transition: box-shadow 0.35s ease, transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.itemWrapper:hover .itemInner {
+  box-shadow: 0 20px 40px -12px rgba(0, 0, 0, 0.18);
+  transform: scale(0.975);
+}
+
+.itemImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  display: block;
+  transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.itemWrapper:hover .itemImage {
+  transform: scale(1.04);
+}
+
+/* Overlay Information */
+.overlayInfo {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.78) 0%, rgba(0, 0, 0, 0.15) 55%, transparent 100%);
+  opacity: 0;
+  transition: opacity 0.35s ease;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 24px;
+  color: #ffffff;
+  pointer-events: none;
+}
+
+.itemWrapper:hover .overlayInfo {
+  opacity: 1;
+}
+
+.categoryBadge {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: rgba(255, 255, 255, 0.7);
+  margin-bottom: 4px;
+}
+
+.cardTitle {
+  font-family: var(--font-serif);
+  font-size: 1.25rem;
+  font-weight: 400;
+  color: #ffffff;
+  line-height: 1.25;
+  margin-bottom: 4px;
+}
+
+.cardLocation {
+  font-family: var(--font-sans);
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.75);
+}
+
+/* Highlights Banner (Bottom Tri-Column Section) */
+.highlightsSection {
+  width: 100vw;
+  margin-left: calc(50% - 50vw);
+  margin-right: calc(50% - 50vw);
+  border-top: 1px solid var(--border-subtle);
+  background-color: var(--bg-secondary);
+  padding: 64px 0;
+  margin-top: 64px;
+}
+
+.highlightsContainer {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 var(--gutter-desktop);
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 40px;
+  box-sizing: border-box;
+}
+
+.highlightCard {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.highlightTag {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--text-muted);
+}
+
+.highlightTitle {
+  font-family: var(--font-serif);
+  font-size: 1.35rem;
+  font-weight: 400;
+  color: var(--text-primary);
+  line-height: 1.3;
+  margin: 4px 0;
+}
+
+.highlightText {
+  font-family: var(--font-sans);
+  font-size: 0.85rem;
+  line-height: 1.6;
+  color: var(--text-secondary);
+}
+
+/* Responsive adjustments */
+@media (max-width: 1024px) {
+  .highlightsContainer {
+    grid-template-columns: 1fr;
+    gap: 32px;
+  }
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: 16px var(--gutter-mobile) 48px;
+  }
+
+  .toolbar {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+
+  .highlightsContainer {
+    padding: 0 var(--gutter-mobile);
+  }
+}
