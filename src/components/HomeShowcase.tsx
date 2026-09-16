@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useEffect, useCallback, useMemo } from 'react';
+import { useState, useRef, useEffect, useMemo } from 'react';
 import Image from 'next/image';
 import { gsap } from 'gsap';
 import { homepageShowcaseSlides, HomepageSlide } from '@/data/homepageShowcase';
@@ -14,12 +14,12 @@ interface HomeShowcaseProps {
  * CYNX REVERSE-ENGINEERED CONSTANTS
  * MAX_SPEED = 0.22 (normalized slide index units per input step)
  * Expo.out duration = 1.05s
- * 5 cycles of items provide an infinite visual buffer for dynamic modulo recycling
+ * 11 cycles of items provide an infinite visual buffer for dynamic recycling
  */
 const MAX_SPEED = 0.22;
 const EASING_DURATION = 1.05;
 const CYCLES = 11;
-const BASE_CYCLE = 5; // Cycle 5 is the centered anchor (5 cycles to left, 5 to right)
+const BASE_CYCLE = 5; // Anchor cycle centered at middle (5 cycles left, 5 cycles right)
 
 export default function HomeShowcase({ slides = homepageShowcaseSlides }: HomeShowcaseProps) {
   const totalSlides = slides.length;
@@ -30,7 +30,6 @@ export default function HomeShowcase({ slides = homepageShowcaseSlides }: HomeSh
 
   const sectionRef = useRef<HTMLElement>(null);
   const stageRef = useRef<HTMLDivElement>(null);
-  const trackRef = useRef<HTMLDivElement>(null);
   const slotRefs = useRef<(HTMLDivElement | null)[]>([]);
 
   // Continuous animation refs
@@ -39,16 +38,14 @@ export default function HomeShowcase({ slides = homepageShowcaseSlides }: HomeSh
   const xToRef = useRef<((value: number) => void) | null>(null);
   const activeIndexRef = useRef(0);
   const activeGlobalIndexRef = useRef(baseOffsetIndex);
-  const itemPitchRef = useRef(0);
-  const baseSlotOffsetRef = useRef(0);
-  const stageWidthRef = useRef(0);
+  const visibleRangeRef = useRef<{ min: number; max: number } | null>(null);
 
   // Drag interaction state
   const isDraggingRef = useRef(false);
   const dragStartXRef = useRef(0);
   const dragStartTargetRef = useRef(0);
 
-  // Generate 5 continuous repeating cycles of slides for infinite buffer
+  // Generate 11 continuous repeating cycles of slides for infinite buffer
   const displaySlides = useMemo(() => {
     return Array.from({ length: CYCLES }, (_, cycleIdx) =>
       slides.map((slide, slideIdx) => ({
@@ -60,97 +57,132 @@ export default function HomeShowcase({ slides = homepageShowcaseSlides }: HomeSh
     ).flat();
   }, [slides, totalSlides]);
 
-
-  // Geometry measurement function
-  const updateMeasurements = useCallback(() => {
-    const stage = stageRef.current;
-    const baseSlot = slotRefs.current[baseOffsetIndex];
-    const nextSlot = slotRefs.current[baseOffsetIndex + 1];
-    if (!stage || !baseSlot) return;
-
-    stageWidthRef.current = stage.clientWidth;
-
-    // Pitch is the distance between consecutive slide centers
-    if (nextSlot) {
-      itemPitchRef.current = nextSlot.offsetLeft - baseSlot.offsetLeft;
-    } else {
-      const slideWidth = baseSlot.offsetWidth;
-      const gap = window.innerWidth <= 640 ? 12 : 24;
-      itemPitchRef.current = slideWidth + gap;
-    }
-
-    // Base slot center offset relative to the track
-    baseSlotOffsetRef.current = baseSlot.offsetLeft + baseSlot.offsetWidth / 2;
-  }, [baseOffsetIndex]);
-
-  // Main GSAP quickTo continuous engine
+  // Main GSAP quickTo continuous engine & Cynx filmstrip geometry
   useEffect(() => {
-    const track = trackRef.current;
     const stage = stageRef.current;
-    if (!track || !stage) return;
+    if (!stage) return;
 
-    updateMeasurements();
+    /**
+     * Cynx Filmstrip Layout Calculation:
+     * - Central dominant active image (native 3:2 proportion, ~55vh height, 6 cols of 12-col grid)
+     * - Narrow surrounding photographic columns (1 col of 12-col grid, identical 55vh height)
+     * - Constant 24px horizontal gaps everywhere
+     * - Continuous smooth cosine interpolation of widths between active and side states
+     */
+    const applyLayout = () => {
+      const stageEl = stageRef.current;
+      if (!stageEl) return;
 
-    const applyTransform = () => {
-      const track = trackRef.current;
-      const stage = stageRef.current;
-      if (!track || !stage) return;
+      const viewportWidth = window.innerWidth;
+      const viewportHeight = window.innerHeight;
+      const viewportCenter = viewportWidth / 2;
+      const isMobile = viewportWidth < 768;
+      const gap = isMobile ? 12 : 24;
 
-      const pitch = itemPitchRef.current;
-      const baseCenter = baseSlotOffsetRef.current;
-      const currentX = posRef.current.listX;
+      // 55vh on desktop, 48vh on mobile
+      const stripHeight = isMobile
+        ? Math.min(380, Math.max(260, viewportHeight * 0.48))
+        : Math.min(560, Math.max(320, viewportHeight * 0.55));
 
-      // Exact viewport horizontal center: window.innerWidth / 2
-      const viewportCenter = window.innerWidth / 2;
-      const stageRect = stage.getBoundingClientRect();
-      const stageLeft = stageRect.left;
+      // Active image width: 6 columns of 12-col grid (~52% of viewport width, 3:2 landscape)
+      const activeWidth = isMobile
+        ? Math.min(viewportWidth * 0.78, 360)
+        : Math.min(Math.min(780, stripHeight * 1.5), viewportWidth * 0.52);
 
-      // The continuous target point in track coordinates that must align at viewportCenter
-      const currentTrackTarget = baseCenter + currentX * pitch;
+      // Narrow side columns: 1 column of 12-col grid (~80-88px on desktop)
+      const sideWidth = isMobile
+        ? Math.max(36, Math.min(52, viewportWidth * 0.12))
+        : Math.max(68, Math.min(92, (viewportWidth - 112 - 11 * gap) / 12));
 
-      // Translate track so that the continuous target point lands exactly at viewportCenter
-      const trackX = viewportCenter - stageLeft - currentTrackTarget;
-      gsap.set(track, { x: trackX, force3D: true });
+      const currentL = posRef.current.listX;
+      const continuousCenter = baseOffsetIndex + currentL;
+      const M = Math.floor(continuousCenter);
+      const lambda = continuousCenter - M;
 
-      // Continuous dynamic scaling & visual hierarchy (center dominant, surrounding smaller & secondary)
-      const centerGlobalIdx = baseOffsetIndex + Math.round(currentX);
-      const minIdx = Math.max(0, centerGlobalIdx - 6);
-      const maxIdx = Math.min(displaySlides.length - 1, centerGlobalIdx + 6);
+      // Cosine smooth width interpolation based on continuous distance from active focus
+      const getWidth = (e: number) => {
+        const d = Math.abs(e);
+        if (d >= 1) return sideWidth;
+        const s = (1 + Math.cos(Math.PI * d)) / 2;
+        return sideWidth + (activeWidth - sideWidth) * s;
+      };
 
-      for (let j = minIdx; j <= maxIdx; j++) {
-        const slot = slotRefs.current[j];
+      // Compute widths and center offsets for visible window [M - 6, M + 6]
+      const minK = Math.max(0, M - 6);
+      const maxK = Math.min(displaySlides.length - 1, M + 6);
+
+      const w: { [k: number]: number } = {};
+      const h: { [k: number]: number } = {};
+
+      for (let k = minK; k <= maxK; k++) {
+        w[k] = getWidth(k - continuousCenter);
+      }
+
+      const pitchM = (w[M] + (w[M + 1] ?? sideWidth)) / 2 + gap;
+      h[M] = -lambda * pitchM;
+      if (M + 1 <= maxK) {
+        h[M + 1] = (1 - lambda) * pitchM;
+      }
+
+      for (let k = M + 2; k <= maxK; k++) {
+        h[k] = h[k - 1] + (w[k - 1] + w[k]) / 2 + gap;
+      }
+      for (let k = M - 1; k >= minK; k--) {
+        h[k] = h[k + 1] - (w[k] + w[k + 1]) / 2 - gap;
+      }
+
+      // Hide slots that moved out of visible window
+      const prevRange = visibleRangeRef.current;
+      visibleRangeRef.current = { min: minK, max: maxK };
+
+      if (prevRange) {
+        for (let k = prevRange.min; k < minK; k++) {
+          const slot = slotRefs.current[k];
+          if (slot) {
+            slot.style.opacity = '0';
+            slot.style.pointerEvents = 'none';
+          }
+        }
+        for (let k = maxK + 1; k <= prevRange.max; k++) {
+          const slot = slotRefs.current[k];
+          if (slot) {
+            slot.style.opacity = '0';
+            slot.style.pointerEvents = 'none';
+          }
+        }
+      }
+
+      // Position all active window slots
+      for (let k = minK; k <= maxK; k++) {
+        const slot = slotRefs.current[k];
         if (!slot) continue;
 
-        const dist = Math.abs(j - (baseOffsetIndex + currentX));
-        const t = Math.max(0, Math.min(1, 1 - dist));
-        // Smooth cubic ease for fluid expansion into center dominance
-        const smooth = t * t * (3 - 2 * t);
+        const width = w[k];
+        const left = viewportCenter + h[k] - width / 2;
+        const isCenterSlot = Math.abs(k - continuousCenter) < 0.5;
 
-        // Active center: scale 1.38 (dominant ~48-50vh), Inactive: scale 1.0 (~34vh)
-        const scale = 1.0 + 0.38 * smooth;
-        // Subtle difference: 0.82 inactive, 1.0 active — photographic & crisp
-        const opacity = 0.82 + 0.18 * smooth;
-
-        slot.style.transform = `scale(${scale.toFixed(4)})`;
-        slot.style.opacity = opacity.toFixed(4);
-        slot.style.zIndex = smooth > 0.4 ? '2' : '1';
+        slot.style.transform = `translate3d(${left.toFixed(2)}px, 0, 0)`;
+        slot.style.width = `${width.toFixed(2)}px`;
+        slot.style.height = `${stripHeight.toFixed(2)}px`;
+        slot.style.opacity = '1';
+        slot.style.pointerEvents = 'auto';
+        slot.style.zIndex = isCenterSlot ? '3' : '1';
       }
     };
 
-    // Initialize quickTo continuous smoother
+    // Initialize GSAP quickTo continuous engine
     const xTo = gsap.quickTo(posRef.current, 'listX', {
       duration: EASING_DURATION,
       ease: 'expo.out',
       onUpdate: () => {
-        // 1. One-way downstream DOM rendering strictly from current animated posRef.current.listX
-        applyTransform();
+        // 1. Update Cynx filmstrip geometry
+        applyLayout();
 
-        // 2. Center-derived active slide detection (Decoupled from high-frequency React loop)
+        // 2. Active slide detection & metadata synchronization
         const rawOffset = posRef.current.listX;
         const normalizedIndex = ((Math.round(rawOffset) % totalSlides) + totalSlides) % totalSlides;
         const currentGlobalIndex = baseOffsetIndex + Math.round(rawOffset);
 
-        // Update active classes on DOM nodes with minimal overhead
         if (currentGlobalIndex !== activeGlobalIndexRef.current) {
           const prevSlot = slotRefs.current[activeGlobalIndexRef.current];
           const newSlot = slotRefs.current[currentGlobalIndex];
@@ -159,7 +191,6 @@ export default function HomeShowcase({ slides = homepageShowcaseSlides }: HomeSh
           activeGlobalIndexRef.current = currentGlobalIndex;
         }
 
-        // Update React metadata ONLY when integer active index transitions
         if (normalizedIndex !== activeIndexRef.current) {
           activeIndexRef.current = normalizedIndex;
           setActiveSlideIndex(normalizedIndex);
@@ -169,37 +200,33 @@ export default function HomeShowcase({ slides = homepageShowcaseSlides }: HomeSh
 
     xToRef.current = xTo;
 
-    // Initial position sync
-    applyTransform();
+    // Initial render layout
+    applyLayout();
     const initialSlot = slotRefs.current[baseOffsetIndex];
     if (initialSlot) initialSlot.classList.add(styles.slideActive);
 
     const handleResize = () => {
-      updateMeasurements();
-      applyTransform();
+      applyLayout();
     };
 
     window.addEventListener('resize', handleResize);
     return () => {
       window.removeEventListener('resize', handleResize);
-      xToRef.current = null;
     };
-  }, [baseOffsetIndex, displaySlides.length, totalSlides, updateMeasurements]);
+  }, [baseOffsetIndex, totalSlides, displaySlides.length]);
 
-  // Continuous Wheel Handler — Cynx Architecture
+  // Continuous wheel interaction with Cynx velocity scaling
   useEffect(() => {
     const stage = stageRef.current;
     if (!stage) return;
 
     const handleWheel = (e: WheelEvent) => {
-      // Prevent browser default vertical page scrolling over the showcase strip
       e.preventDefault();
 
-      // Combine vertical (trackpad standard) and horizontal delta
       const rawDelta = Math.abs(e.deltaY) >= Math.abs(e.deltaX) ? e.deltaY : e.deltaX;
       const normalizedDelta = e.deltaMode === 1 ? rawDelta * 32 : rawDelta;
 
-      // Cynx velocity scaling: smoother resistance as target diverges from current pos
+      // Cynx velocity scaling: smoother resistance as target diverges
       const currentSpread = Math.abs(listXTargetRef.current - posRef.current.listX);
       const denominator = 320 + Math.min(300, currentSpread * 180);
       const step = normalizedDelta / denominator;
@@ -207,10 +234,8 @@ export default function HomeShowcase({ slides = homepageShowcaseSlides }: HomeSh
       // Clamp step to Cynx MAX_SPEED (0.22)
       const clampedStep = Math.max(-MAX_SPEED, Math.min(MAX_SPEED, step));
 
-      // Accumulate continuous target
       listXTargetRef.current += clampedStep;
 
-      // Dispatch to GSAP quickTo
       if (xToRef.current) {
         xToRef.current(listXTargetRef.current);
       }
@@ -222,7 +247,7 @@ export default function HomeShowcase({ slides = homepageShowcaseSlides }: HomeSh
     };
   }, []);
 
-  // Pointer drag support for tactile direct manipulation
+  // Pointer drag direct manipulation
   const handlePointerDown = (e: React.PointerEvent) => {
     if (e.button !== 0) return;
     isDraggingRef.current = true;
@@ -234,9 +259,8 @@ export default function HomeShowcase({ slides = homepageShowcaseSlides }: HomeSh
   const handlePointerMove = (e: React.PointerEvent) => {
     if (!isDraggingRef.current) return;
     const deltaX = e.clientX - dragStartXRef.current;
-    const pitch = itemPitchRef.current || 400;
-    // Moving finger right brings left images (decreases listX)
-    const slideDelta = -deltaX / pitch;
+    // Drag pitch calibrated to smooth side column width + gap (~108px)
+    const slideDelta = -deltaX / 108;
     listXTargetRef.current = dragStartTargetRef.current + slideDelta;
 
     if (xToRef.current) {
@@ -254,16 +278,15 @@ export default function HomeShowcase({ slides = homepageShowcaseSlides }: HomeSh
     }
   };
 
-  // Click on any visible slide to center it smoothly
+  // Click on any visible side column to center it smoothly
   const handleSlideClick = (globalIdx: number) => {
     listXTargetRef.current = globalIdx - baseOffsetIndex;
-
     if (xToRef.current) {
       xToRef.current(listXTargetRef.current);
     }
   };
 
-  // Keyboard navigation: Left/Right and Up/Down arrows
+  // Keyboard arrow navigation
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
@@ -280,9 +303,8 @@ export default function HomeShowcase({ slides = homepageShowcaseSlides }: HomeSh
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
-  // Active slide metadata
+  // Active photograph metadata
   const currentSlide = slides[activeSlideIndex] ?? slides[0];
-  const displayLocation = currentSlide.location ? `${currentSlide.location.toUpperCase()} · ` : '';
 
   return (
     <section
@@ -290,7 +312,7 @@ export default function HomeShowcase({ slides = homepageShowcaseSlides }: HomeSh
       className={styles.showcaseSection}
       aria-label="Photographic Showcase"
     >
-      {/* Visual Photographic Stage: Cynx continuous quickTo horizontal strip */}
+      {/* Visual Stage: Cynx continuous horizontal photographic film strip */}
       <div
         ref={stageRef}
         className={styles.stageContainer}
@@ -299,58 +321,53 @@ export default function HomeShowcase({ slides = homepageShowcaseSlides }: HomeSh
         onPointerUp={handlePointerUp}
         onPointerCancel={handlePointerUp}
       >
-        <div
-          ref={trackRef}
-          className={styles.track}
-        >
-          {displaySlides.map((item, idx) => {
-            const isBaseInitialActive = idx === baseOffsetIndex;
+        {displaySlides.map((item, idx) => {
+          const isBaseInitialActive = idx === baseOffsetIndex;
 
-            return (
-              <div
-                key={item.uniqueKey}
-                ref={(el) => {
-                  slotRefs.current[idx] = el;
-                }}
-                className={`${styles.slide} ${isBaseInitialActive ? styles.slideActive : ''}`}
-                onClick={() => handleSlideClick(idx)}
-                aria-label={`View photograph ${item.originalIndex + 1}`}
-              >
-                <div
-                  className={styles.frame}
-                  style={{ aspectRatio: `${item.width || 3} / ${item.height || 2}` }}
-                >
-                  <Image
-                    src={item.src}
-                    alt={item.alt}
-                    width={item.width || 1800}
-                    height={item.height || 1200}
-                    priority={idx >= baseOffsetIndex - 1 && idx <= baseOffsetIndex + 2}
-                    className={styles.image}
-                    sizes="(max-width: 640px) 80vw, (max-width: 1024px) 68vw, 840px"
-                  />
-                </div>
+          return (
+            <div
+              key={item.uniqueKey}
+              ref={(el) => {
+                slotRefs.current[idx] = el;
+              }}
+              className={`${styles.slide} ${isBaseInitialActive ? styles.slideActive : ''}`}
+              onClick={() => handleSlideClick(idx)}
+              aria-label={`View photograph ${item.originalIndex + 1}`}
+            >
+              <div className={styles.imageWrapper}>
+                <Image
+                  src={item.src}
+                  alt={item.alt}
+                  fill
+                  sizes="(max-width: 768px) 78vw, 780px"
+                  priority={idx >= baseOffsetIndex - 1 && idx <= baseOffsetIndex + 1}
+                  className={styles.image}
+                />
               </div>
-            );
-          })}
-        </div>
+            </div>
+          );
+        })}
       </div>
 
-      {/* Editorial Details — Geometrically Belonging to Active Photograph */}
+      {/* Editorial Details Row: Positioned cleanly below the film strip */}
       <div className={styles.infoArea}>
         <div className={styles.infoContent}>
           <div className={styles.infoLeft}>
             <span className={styles.photoTitle}>{currentSlide.title}</span>
+            <span className={styles.photoMeta}>
+              {currentSlide.year} — {currentSlide.location}
+            </span>
           </div>
           <div className={styles.infoRight}>
-            <span className={styles.locationYear}>
-              {displayLocation}
-              {currentSlide.year}
-            </span>
-            <span className={styles.separator}>·</span>
-            <span className={styles.counter}>
-              {String(activeSlideIndex + 1).padStart(2, '0')} / {String(totalSlides).padStart(2, '0')}
-            </span>
+            <div className={styles.counter}>
+              <span>{String(activeSlideIndex + 1).padStart(2, '0')}</span>
+              <span>{String(totalSlides).padStart(2, '0')}</span>
+            </div>
+            <div className={styles.filmIndicator} aria-hidden="true">
+              <span className={styles.filmBar} />
+              <span className={styles.filmBar} />
+              <span className={styles.filmBar} />
+            </div>
           </div>
         </div>
       </div>
