@@ -19,9 +19,9 @@ export default function Navigation() {
       <div className={styles.inner}>
         <Link href="/" className={styles.brand} aria-label={`${siteConfig.name} - Home`}>
           <span className={styles.brandName}>{siteConfig.name}</span>
-          <span className={styles.brandMeta}>
+          {/* <span className={styles.brandMeta}>
             {siteConfig.profession} · {siteConfig.location}
-          </span>
+          </span> */}
         </Link>
 
         <nav className={styles.nav} aria-label="Main Navigation">

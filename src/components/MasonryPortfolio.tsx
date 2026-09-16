@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import Image from 'next/image';
 import gsap from 'gsap';
-import { masonryPortfolioItems, MasonryItem } from '@/data/masonryPortfolio';
+import { masonryPortfolioItems, MasonryItem, getItemGeometry } from '@/data/masonryPortfolio';
 import styles from './MasonryPortfolio.module.css';
 
 type CategoryFilter = 'all' | 'landscape' | 'portraits' | 'architecture' | 'documentary';
@@ -15,6 +15,7 @@ interface GridPositionedItem extends MasonryItem {
   h: number;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const CATEGORIES: { id: CategoryFilter; label: string }[] = [
   { id: 'all', label: 'All' },
   { id: 'landscape', label: 'Landscape' },
@@ -35,11 +36,20 @@ export default function MasonryPortfolio() {
   const isAnimatingRef = useRef<boolean>(false);
 
   // Determine responsive column count
+  // Desktop: 4 columns, Tablet: 3 columns, Compact & Mobile: 2-column intentional Bento
   const getColumnCount = useCallback((width: number): number => {
     if (width >= 1024) return 4;
-    if (width >= 680) return 3;
-    if (width >= 480) return 2;
-    return 1;
+    if (width >= 720) return 3;
+    return 2;
+  }, []);
+
+  // Determine responsive gap
+  const getGap = useCallback((width: number): number => {
+    if (width >= 1024) return 16;
+    if (width >= 720) return 14;
+    if (width >= 480) return 12;
+    if (width > 360) return 10;
+    return 8;
   }, []);
 
   // Filter items when category changes
@@ -48,40 +58,89 @@ export default function MasonryPortfolio() {
     return items.filter((item) => item.category === selectedCategory);
   }, [items, selectedCategory]);
 
-  // Calculate masonry grid coordinates using greedy column height binning
+  // Calculate masonry grid coordinates supporting both portrait and landscape cards
+  // with mathematically uniform rhythm: left outer gap = internal gaps = right outer gap = G
   const { gridItems, totalHeight } = useMemo(() => {
     if (!containerWidth || columns <= 0) {
       return { gridItems: [] as GridPositionedItem[], totalHeight: 800 };
     }
 
+    const gap = getGap(containerWidth);
     const colHeights = new Array(columns).fill(0);
-    const colWidth = containerWidth / columns;
+    // Formula: W = N * colWidth + (N + 1) * G
+    // => colWidth = (W - (N + 1) * G) / N
+    const colWidth = (containerWidth - (columns + 1) * gap) / columns;
 
     const grid = filteredItems.map((item) => {
-      // Find shortest column
-      let minCol = 0;
-      for (let i = 1; i < columns; i++) {
-        if (colHeights[i] < colHeights[minCol]) {
-          minCol = i;
+      const { orientation, aspectRatio } = getItemGeometry(item);
+      const isLandscape = orientation === 'landscape';
+      // In multi-column layouts, respect item.mobileSpan or default to 2 for landscape
+      const span2 = columns >= 2 && (item.mobileSpan ? item.mobileSpan === 2 : isLandscape);
+
+      if (span2) {
+        // Find adjacent column pair (c, c + 1) that minimizes placement height, difference, and spread
+        let bestC = 0;
+        let bestScore = Infinity;
+        const w = 2 * colWidth + gap;
+        const h = Math.round(w / aspectRatio);
+
+        for (let c = 0; c <= columns - 2; c++) {
+          const topY = Math.max(colHeights[c], colHeights[c + 1]);
+          const diff = Math.abs(colHeights[c] - colHeights[c + 1]);
+          const tempHeights = [...colHeights];
+          tempHeights[c] = topY + h + gap;
+          tempHeights[c + 1] = topY + h + gap;
+          const spread = Math.max(...tempHeights) - Math.min(...tempHeights);
+          const score = topY * 1.5 + diff * 0.5 + spread;
+          if (score < bestScore) {
+            bestScore = score;
+            bestC = c;
+          }
         }
+
+        const topY = Math.max(colHeights[bestC], colHeights[bestC + 1]);
+        const x = gap + bestC * (colWidth + gap);
+        const y = topY;
+
+        colHeights[bestC] = y + h + gap;
+        colHeights[bestC + 1] = y + h + gap;
+
+        return {
+          ...item,
+          x,
+          y,
+          w,
+          h,
+        };
+      } else {
+        // 1-column placement (portraits, squares, and paired cards)
+        let minCol = 0;
+        for (let i = 1; i < columns; i++) {
+          if (colHeights[i] < colHeights[minCol]) {
+            minCol = i;
+          }
+        }
+
+        const w = colWidth;
+        const h = Math.round(w / aspectRatio);
+        const x = gap + minCol * (colWidth + gap);
+        const y = colHeights[minCol];
+
+        colHeights[minCol] += h + gap;
+
+        return {
+          ...item,
+          x,
+          y,
+          w,
+          h,
+        };
       }
-
-      const x = minCol * colWidth;
-      const y = colHeights[minCol];
-      colHeights[minCol] += item.height;
-
-      return {
-        ...item,
-        x,
-        y,
-        w: colWidth,
-        h: item.height,
-      };
     });
 
-    const maxColHeight = Math.max(...colHeights, 0);
+    const maxColHeight = Math.max(...colHeights, gap) - gap;
     return { gridItems: grid, totalHeight: maxColHeight };
-  }, [filteredItems, containerWidth, columns]);
+  }, [filteredItems, containerWidth, columns, getGap]);
 
   // ResizeObserver for responsive width detection
   useEffect(() => {
@@ -141,6 +200,8 @@ export default function MasonryPortfolio() {
         gsap.to(el, {
           x: item.x,
           y: item.y,
+          width: item.w,
+          height: item.h,
           opacity: 1,
           filter: 'blur(0px)',
           duration: 0.6,
@@ -155,6 +216,7 @@ export default function MasonryPortfolio() {
   }, [gridItems]);
 
   // Handle re-shuffle with smooth GSAP glide
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const handleShuffle = () => {
     if (isAnimatingRef.current) return;
     isAnimatingRef.current = true;
@@ -173,6 +235,7 @@ export default function MasonryPortfolio() {
   };
 
   // Handle category filter
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const handleCategoryChange = (category: CategoryFilter) => {
     setSelectedCategory(category);
   };
@@ -180,7 +243,7 @@ export default function MasonryPortfolio() {
   return (
     <div className={styles.container}>
       {/* Controls & Filter Toolbar */}
-      <div className={styles.toolbar}>
+      {/* <div className={styles.toolbar}>
         <div className={styles.filterGroup}>
           {CATEGORIES.map((cat) => (
             <button
@@ -217,13 +280,13 @@ export default function MasonryPortfolio() {
             <span>Re-shuffle</span>
           </button>
         </div>
-      </div>
+      </div> */}
 
       {/* React Bits Masonry Gallery Container */}
       <div
         ref={containerRef}
         className={styles.masonryList}
-        style={{ height: totalHeight > 0 ? `${totalHeight + 32}px` : '800px' }}
+        style={{ height: totalHeight > 0 ? `${totalHeight}px` : '800px' }}
       >
         {gridItems.map((item) => (
           <div
@@ -241,10 +304,10 @@ export default function MasonryPortfolio() {
           >
             <div className={styles.itemInner}>
               <Image
-                src={item.img}
+                src={item.src || item.img || ''}
                 alt={item.title}
                 fill
-                sizes="(max-width: 680px) 100vw, (max-width: 1024px) 33vw, 25vw"
+                sizes="(max-width: 680px) 100vw, (max-width: 1024px) 66vw, 50vw"
                 className={styles.itemImage}
                 priority={parseInt(item.id, 10) <= 4}
               />
@@ -259,7 +322,7 @@ export default function MasonryPortfolio() {
       </div>
 
       {/* Bottom Tri-Column Highlight Section */}
-      <section className={styles.highlightsSection}>
+      {/* <section className={styles.highlightsSection}>
         <div className={styles.highlightsContainer}>
           <div className={styles.highlightCard}>
             <span className={styles.highlightTag}>01 / Curated Medium</span>
@@ -283,7 +346,7 @@ export default function MasonryPortfolio() {
             </p>
           </div>
         </div>
-      </section>
+      </section> */}
     </div>
   );
 }

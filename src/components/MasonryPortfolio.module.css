@@ -3,10 +3,11 @@
    ========================================================================== */
 
 .container {
-  width: 100%;
-  max-width: 1400px;
-  margin: 0 auto;
-  padding: 24px var(--gutter-desktop) 64px;
+  width: 100vw;
+  margin-left: calc(50% - 50vw);
+  margin-right: calc(50% - 50vw);
+  max-width: 100vw;
+  padding: clamp(6px, 1vw, 12px) 0 64px;
   box-sizing: border-box;
 }
 
@@ -106,7 +107,7 @@
   position: absolute;
   top: 0;
   left: 0;
-  padding: 8px;
+  padding: 0;
   box-sizing: border-box;
   will-change: transform, width, height, opacity;
   cursor: pointer;
@@ -187,9 +188,7 @@
 
 /* Highlights Banner (Bottom Tri-Column Section) */
 .highlightsSection {
-  width: 100vw;
-  margin-left: calc(50% - 50vw);
-  margin-right: calc(50% - 50vw);
+  width: 100%;
   border-top: 1px solid var(--border-subtle);
   background-color: var(--bg-secondary);
   padding: 64px 0;
@@ -246,7 +245,7 @@
 
 @media (max-width: 768px) {
   .container {
-    padding: 16px var(--gutter-mobile) 48px;
+    padding: clamp(4px, 1vw, 8px) 0 48px;
   }
 
   .toolbar {
@@ -257,5 +256,55 @@
 
   .highlightsContainer {
     padding: 0 var(--gutter-mobile);
+  }
+}
+
+@media (max-width: 640px) {
+  .itemInner {
+    border-radius: 8px;
+  }
+
+  .overlayInfo {
+    opacity: 1;
+    padding: 8px 10px;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.62) 0%, rgba(0, 0, 0, 0.15) 50%, transparent 100%);
+  }
+
+  .categoryBadge {
+    font-size: 0.56rem;
+    margin-bottom: 2px;
+    letter-spacing: 0.1em;
+  }
+
+  .cardTitle {
+    font-size: 0.82rem;
+    line-height: 1.18;
+    margin-bottom: 2px;
+  }
+
+  .cardLocation {
+    font-size: 0.62rem;
+  }
+}
+
+@media (hover: none) and (pointer: coarse) {
+  .overlayInfo {
+    opacity: 1;
+    padding: 10px 12px;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.62) 0%, rgba(0, 0, 0, 0.15) 50%, transparent 100%);
+  }
+
+  .categoryBadge {
+    font-size: 0.58rem;
+    margin-bottom: 2px;
+  }
+
+  .cardTitle {
+    font-size: 0.88rem;
+    margin-bottom: 2px;
+  }
+
+  .cardLocation {
+    font-size: 0.66rem;
   }
 }
