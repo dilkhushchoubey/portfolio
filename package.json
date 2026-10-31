@@ -3,6 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
+    "sync-images": "node scripts/sync-homepage-images.mjs",
+    "predev": "node scripts/sync-homepage-images.mjs",
+    "prebuild": "node scripts/sync-homepage-images.mjs",
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
