@@ -142,7 +142,32 @@ export function syncHomepageImages() {
   return metadataMap;
 }
 
-if (process.argv[1] === fileURLToPath(import.meta.url)) {
-  syncHomepageImages();
+export function watchHomepageImages() {
+  if (!fs.existsSync(homepageDir)) return null;
+  let timeout = null;
+  const watcher = fs.watch(homepageDir, (eventType, filename) => {
+    if (!filename || filename.startsWith('.')) return;
+    if (timeout) clearTimeout(timeout);
+    timeout = setTimeout(() => {
+      try {
+        console.log(`[watch-homepage-images] Detected change (${eventType}: ${filename}), syncing homepage images...`);
+        syncHomepageImages();
+      } catch (err) {
+        console.error('[watch-homepage-images] Error during sync:', err.message);
+      }
+    }, 150);
+  });
+  console.log(`[watch-homepage-images] Watching ${homepageDir} for changes...`);
+  return watcher;
 }
+
+if (process.argv[1] === fileURLToPath(import.meta.url)) {
+  if (process.argv.includes('--watch')) {
+    syncHomepageImages();
+    watchHomepageImages();
+  } else {
+    syncHomepageImages();
+  }
+}
+
 

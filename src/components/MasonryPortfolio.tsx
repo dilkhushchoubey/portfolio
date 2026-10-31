@@ -3,11 +3,13 @@
 import React, { useEffect, useRef } from 'react';
 import Image from 'next/image';
 import gsap from 'gsap';
+import { MasonryItem } from '@/data/masonryPortfolio';
 import { masonryPortfolioItems } from "@/data/masonryPortfolioItems";
 import styles from './MasonryPortfolio.module.css';
 
-export default function MasonryPortfolio() {
+export default function MasonryPortfolio({ items }: { items?: MasonryItem[] } = {}) {
   const gridRef = useRef<HTMLDivElement>(null);
+  const displayItems = items && items.length > 0 ? items : masonryPortfolioItems;
 
   useEffect(() => {
     const grid = gridRef.current;
@@ -44,7 +46,7 @@ export default function MasonryPortfolio() {
   return (
     <div className={styles.container}>
       <div ref={gridRef} className={styles.bentoGrid}>
-        {masonryPortfolioItems.map((item, index) => {
+        {displayItems.map((item, index) => {
           // Determine slot role for the deterministic desktop layout:
           // Row 1: L (0), P (1), P (2)
           // Row 2: P (3), P (4), L (5)

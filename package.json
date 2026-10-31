@@ -6,7 +6,7 @@
     "sync-images": "node scripts/sync-homepage-images.mjs",
     "predev": "node scripts/sync-homepage-images.mjs",
     "prebuild": "node scripts/sync-homepage-images.mjs",
-    "dev": "next dev",
+    "dev": "node scripts/dev.mjs",
     "build": "next build",
     "start": "next start",
     "lint": "eslint"
