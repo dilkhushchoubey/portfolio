@@ -1,3 +1,9 @@
+/* ==========================================================================
+   HEADER & NAVIGATION
+   Desktop: Horizontal links
+   Mobile (<= 768px): Minimalist editorial hamburger button & clean overlay
+   ========================================================================== */
+
 .header {
   position: fixed;
   top: 0;
@@ -57,56 +63,25 @@
   white-space: nowrap;
 }
 
-.brandMeta {
-  font-family: var(--font-sans);
-  font-size: 0.68rem;
-  font-weight: 400;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--text-muted);
-  margin-top: 2px;
-  line-height: 1.2;
+@media (max-width: 640px) {
+  .brandName {
+    font-size: 0.95rem;
+    letter-spacing: 0.12em;
+  }
 }
 
-.nav {
+@media (max-width: 360px) {
+  .brandName {
+    font-size: 0.85rem;
+    letter-spacing: 0.1em;
+  }
+}
+
+/* Desktop Horizontal Navigation */
+.desktopNav {
   display: flex;
   align-items: center;
   gap: 32px;
-}
-
-@media (max-width: 640px) {
-  .inner {
-    padding: 0 16px;
-  }
-
-  .brandName {
-    font-size: 0.86rem;
-    letter-spacing: 0.11em;
-  }
-
-  .brandMeta {
-    font-size: 0.62rem;
-    letter-spacing: 0.08em;
-  }
-
-  .nav {
-    gap: 16px;
-  }
-}
-
-@media (max-width: 380px) {
-  .inner {
-    padding: 0 12px;
-  }
-
-  .brandName {
-    font-size: 0.80rem;
-    letter-spacing: 0.09em;
-  }
-
-  .nav {
-    gap: 12px;
-  }
 }
 
 .navLink {
@@ -141,16 +116,128 @@
   background-color: var(--text-primary);
 }
 
-@media (max-width: 640px) {
-  .navLink {
-    font-size: 0.76rem;
-    letter-spacing: 0.08em;
+/* ==========================================================================
+   HAMBURGER BUTTON (Hidden on desktop, active <= 768px)
+   ========================================================================== */
+.hamburgerButton {
+  display: none;
+  flex-direction: column;
+  justify-content: space-between;
+  width: 24px;
+  height: 15px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  z-index: 110;
+  position: relative;
+}
+
+.hamburgerBar {
+  display: block;
+  width: 100%;
+  height: 1.5px;
+  background-color: var(--text-primary);
+  border-radius: 1px;
+  transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1),
+              opacity 0.2s ease;
+  transform-origin: center;
+}
+
+/* Hamburger ☰ transforms into × */
+.hamburgerActive .hamburgerBar:nth-child(1) {
+  transform: translateY(6.75px) rotate(45deg);
+}
+
+.hamburgerActive .hamburgerBar:nth-child(2) {
+  opacity: 0;
+  transform: scaleX(0);
+}
+
+.hamburgerActive .hamburgerBar:nth-child(3) {
+  transform: translateY(-6.75px) rotate(-45deg);
+}
+
+/* Breakpoint for Navigation Switch: 768px */
+@media (max-width: 768px) {
+  .desktopNav {
+    display: none;
+  }
+
+  .hamburgerButton {
+    display: flex;
   }
 }
 
-@media (max-width: 380px) {
-  .navLink {
-    font-size: 0.72rem;
-    letter-spacing: 0.06em;
+/* ==========================================================================
+   MOBILE NAVIGATION DRAWER OVERLAY
+   ========================================================================== */
+.mobileOverlay {
+  position: fixed;
+  top: var(--header-height);
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: calc(100vh - var(--header-height));
+  background-color: rgba(251, 250, 248, 0.98);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  z-index: 99;
+  display: flex;
+  flex-direction: column;
+  padding: 48px var(--gutter-mobile) 40px;
+  border-top: 1px solid var(--border-subtle);
+  animation: fadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  overflow-y: auto;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.mobileNav {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.mobileNavLink {
+  font-family: var(--font-sans);
+  font-size: 1.3rem;
+  font-weight: 450;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  text-decoration: none;
+  padding: 8px 0;
+  transition: color var(--transition-subtle);
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.mobileNavLink:hover,
+.mobileNavLink:focus-visible {
+  color: var(--text-primary);
+}
+
+.mobileNavLinkActive {
+  color: var(--text-primary);
+  font-weight: 550;
+  border-bottom-color: var(--text-primary);
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  .hamburgerBar,
+  .mobileOverlay,
+  .mobileNavLink {
+    transition: none !important;
+    animation: none !important;
   }
 }

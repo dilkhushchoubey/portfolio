@@ -9,7 +9,6 @@ const newsreader = Newsreader({
   subsets: ['latin'],
   variable: '--font-serif',
   display: 'swap',
-  weight: ['300', '400', '500'],
   style: ['normal', 'italic'],
 });
 
@@ -17,7 +16,6 @@ const inter = Inter({
   subsets: ['latin'],
   variable: '--font-sans',
   display: 'swap',
-  weight: ['300', '400', '500', '600'],
 });
 
 export const viewport: Viewport = {

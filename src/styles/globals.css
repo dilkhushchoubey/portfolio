@@ -20,12 +20,12 @@
   --font-mono: "SF Mono", Menlo, Monaco, "Cascadia Code", monospace;
 
   /* Layout and Spacing */
-  --site-max-width: 1360px;
+  --site-max-width: 100%;
   --editorial-max-width: 720px;
   --header-height: 72px;
-  --gutter-desktop: 56px;
-  --gutter-tablet: 36px;
-  --gutter-mobile: 20px;
+  --gutter-desktop: clamp(16px, 1.8vw, 28px);
+  --gutter-tablet: 20px;
+  --gutter-mobile: 16px;
 
   /* Transitions */
   --transition-subtle: 180ms ease-out;
