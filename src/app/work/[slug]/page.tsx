@@ -62,8 +62,8 @@ export default async function ProjectPage({ params }: PageProps) {
 
   return (
     <article className={styles.article}>
-      <Link href="/work" className={styles.backLink}>
-        &larr; Back to Work
+      <Link href="/work/projects" className={styles.backLink}>
+        &larr; Back to Projects
       </Link>
 
       <header className={styles.header}>

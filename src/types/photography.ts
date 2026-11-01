@@ -1,4 +1,4 @@
-export type AspectRatio = '3:2' | '4:3' | '16:9' | '1:1';
+export type AspectRatio = '3:2' | '4:3' | '16:9' | '1:1' | '2:3' | '3:4' | '9:16' | string;
 
 export type ProjectKind = 'project' | 'series';
 

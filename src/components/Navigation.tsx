@@ -8,24 +8,31 @@ import styles from './Navigation.module.css';
 
 export default function Navigation() {
   const [isOpen, setIsOpen] = useState(false);
+  const [isWorkOpen, setIsWorkOpen] = useState(false);
+  const [isMobileWorkOpen, setIsMobileWorkOpen] = useState(true); // Open by default in mobile drawer for easy discovery
   const pathname = usePathname();
   const [prevPathname, setPrevPathname] = useState(pathname);
+
   const menuRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
+  const desktopWorkRef = useRef<HTMLDivElement>(null);
 
-  // Close menu during render if route changes
+  // Close menus when route changes
   if (prevPathname !== pathname) {
     setPrevPathname(pathname);
     setIsOpen(false);
+    setIsWorkOpen(false);
   }
 
-  const navItems = [
-    { label: 'Work', href: '/work' },
-    { label: 'About', href: '/about' },
-    { label: 'Contact', href: '/contact' },
+  const isWorkActive = pathname.startsWith('/work');
+
+  const workSubmenu = [
+    { label: 'Projects', href: '/work/projects' },
+    { label: 'Portraits', href: '/work/portraits' },
+    { label: 'Stills', href: '/work/stills' },
   ];
 
-  // Handle keyboard Escape, outside click, and body scroll lock
+  // Handle keyboard Escape, outside click, and body scroll lock for mobile menu
   useEffect(() => {
     if (!isOpen) return;
 
@@ -60,12 +67,45 @@ export default function Navigation() {
     };
   }, [isOpen]);
 
+  // Handle outside click & escape for desktop Work submenu
+  useEffect(() => {
+    if (!isWorkOpen) return;
+
+    const handleClickOutside = (e: MouseEvent) => {
+      if (
+        desktopWorkRef.current &&
+        !desktopWorkRef.current.contains(e.target as Node)
+      ) {
+        setIsWorkOpen(false);
+      }
+    };
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setIsWorkOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    window.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isWorkOpen]);
+
   const toggleMenu = () => {
     setIsOpen((prev) => !prev);
   };
 
   const closeMenu = () => {
     setIsOpen(false);
+    setIsWorkOpen(false);
+  };
+
+  const toggleWorkSubmenu = () => {
+    setIsWorkOpen((prev) => !prev);
   };
 
   return (
@@ -80,31 +120,89 @@ export default function Navigation() {
           <span className={styles.brandName}>{siteConfig.name}</span>
         </Link>
 
-        {/* Desktop Horizontal Navigation (Hidden on small screens) */}
+        {/* Desktop Horizontal Navigation */}
         <nav className={styles.desktopNav} aria-label="Main Navigation">
-          {navItems.map((item) => {
-            const isActive =
-              item.href === '/work'
-                ? pathname.startsWith('/work')
-                : pathname === item.href;
-
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={`${styles.navLink} ${isActive ? styles.navLinkActive : ''}`}
+          {/* Expandable Work Navigation Item */}
+          <div className={styles.workNavWrapper} ref={desktopWorkRef}>
+            <button
+              type="button"
+              className={`${styles.navLink} ${styles.workTrigger} ${
+                isWorkActive ? styles.navLinkActive : ''
+              }`}
+              onClick={toggleWorkSubmenu}
+              aria-expanded={isWorkOpen}
+              aria-haspopup="true"
+              aria-label="Toggle Work submenu"
+            >
+              <span>Work</span>
+              <span
+                className={`${styles.caret} ${isWorkOpen ? styles.caretOpen : ''}`}
+                aria-hidden="true"
               >
-                {item.label}
-              </Link>
-            );
-          })}
+                ▾
+              </span>
+            </button>
+
+            {isWorkOpen && (
+              <div
+                className={styles.desktopSubmenu}
+                role="menu"
+                aria-label="Work sections"
+              >
+                {workSubmenu.map((sub) => {
+                  const isSubActive =
+                    sub.href === '/work/projects'
+                      ? pathname === '/work/projects' ||
+                        pathname === '/work' ||
+                        (pathname.startsWith('/work/') &&
+                          pathname !== '/work/portraits' &&
+                          pathname !== '/work/stills')
+                      : pathname === sub.href;
+
+                  return (
+                    <Link
+                      key={sub.href}
+                      href={sub.href}
+                      role="menuitem"
+                      onClick={() => setIsWorkOpen(false)}
+                      className={`${styles.submenuLink} ${
+                        isSubActive ? styles.submenuLinkActive : ''
+                      }`}
+                    >
+                      {sub.label}
+                    </Link>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+
+          <Link
+            href="/about"
+            className={`${styles.navLink} ${
+              pathname === '/about' ? styles.navLinkActive : ''
+            }`}
+          >
+            About
+          </Link>
+
+          <Link
+            href="/contact"
+            className={`${styles.navLink} ${
+              pathname === '/contact' ? styles.navLinkActive : ''
+            }`}
+          >
+            Contact
+          </Link>
         </nav>
 
-        {/* Mobile Hamburger Button (Active on small screens) */}
+        {/* Mobile Hamburger Button */}
         <button
           ref={buttonRef}
           type="button"
-          className={`${styles.hamburgerButton} ${isOpen ? styles.hamburgerActive : ''}`}
+          className={`${styles.hamburgerButton} ${
+            isOpen ? styles.hamburgerActive : ''
+          }`}
           aria-label={isOpen ? 'Close menu' : 'Open menu'}
           aria-expanded={isOpen}
           aria-controls="mobile-navigation"
@@ -127,25 +225,75 @@ export default function Navigation() {
           aria-label="Mobile Navigation"
         >
           <nav className={styles.mobileNav}>
-            {navItems.map((item) => {
-              const isActive =
-                item.href === '/work'
-                  ? pathname.startsWith('/work')
-                  : pathname === item.href;
-
-              return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  onClick={closeMenu}
-                  className={`${styles.mobileNavLink} ${
-                    isActive ? styles.mobileNavLinkActive : ''
+            {/* Expandable Work Accordion Item */}
+            <div className={styles.mobileWorkGroup}>
+              <button
+                type="button"
+                className={`${styles.mobileNavLink} ${styles.mobileWorkTrigger} ${
+                  isWorkActive ? styles.mobileNavLinkActive : ''
+                }`}
+                onClick={() => setIsMobileWorkOpen((prev) => !prev)}
+                aria-expanded={isMobileWorkOpen}
+              >
+                <span>Work</span>
+                <span
+                  className={`${styles.mobileWorkIndicator} ${
+                    isMobileWorkOpen ? styles.mobileWorkIndicatorOpen : ''
                   }`}
+                  aria-hidden="true"
                 >
-                  {item.label}
-                </Link>
-              );
-            })}
+                  {isMobileWorkOpen ? '−' : '+'}
+                </span>
+              </button>
+
+              {isMobileWorkOpen && (
+                <div className={styles.mobileSubmenu}>
+                  {workSubmenu.map((sub) => {
+                    const isSubActive =
+                      sub.href === '/work/projects'
+                        ? pathname === '/work/projects' ||
+                          pathname === '/work' ||
+                          (pathname.startsWith('/work/') &&
+                            pathname !== '/work/portraits' &&
+                            pathname !== '/work/stills')
+                        : pathname === sub.href;
+
+                    return (
+                      <Link
+                        key={sub.href}
+                        href={sub.href}
+                        onClick={closeMenu}
+                        className={`${styles.mobileSubmenuLink} ${
+                          isSubActive ? styles.mobileSubmenuLinkActive : ''
+                        }`}
+                      >
+                        {sub.label}
+                      </Link>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+
+            <Link
+              href="/about"
+              onClick={closeMenu}
+              className={`${styles.mobileNavLink} ${
+                pathname === '/about' ? styles.mobileNavLinkActive : ''
+              }`}
+            >
+              About
+            </Link>
+
+            <Link
+              href="/contact"
+              onClick={closeMenu}
+              className={`${styles.mobileNavLink} ${
+                pathname === '/contact' ? styles.mobileNavLinkActive : ''
+              }`}
+            >
+              Contact
+            </Link>
           </nav>
         </div>
       )}

@@ -1,7 +1,7 @@
 /* ==========================================================================
    HEADER & NAVIGATION
-   Desktop: Horizontal links
-   Mobile (<= 768px): Minimalist editorial hamburger button & clean overlay
+   Desktop: Horizontal links with expandable Work submenu
+   Mobile (<= 768px): Minimalist editorial hamburger button & expandable drawer
    ========================================================================== */
 
 .header {
@@ -77,7 +77,9 @@
   }
 }
 
-/* Desktop Horizontal Navigation */
+/* ==========================================================================
+   DESKTOP HORIZONTAL NAVIGATION
+   ========================================================================== */
 .desktopNav {
   display: flex;
   align-items: center;
@@ -95,6 +97,9 @@
   padding: 4px 0;
   transition: color var(--transition-subtle);
   white-space: nowrap;
+  background: none;
+  border: none;
+  cursor: pointer;
 }
 
 .navLink:hover {
@@ -114,6 +119,83 @@
   right: 0;
   height: 1px;
   background-color: var(--text-primary);
+}
+
+/* Expandable Work Dropdown */
+.workNavWrapper {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.workTrigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.caret {
+  display: inline-block;
+  font-size: 0.65rem;
+  transition: transform var(--transition-subtle);
+  opacity: 0.65;
+  line-height: 1;
+}
+
+.caretOpen {
+  transform: rotate(180deg);
+}
+
+.desktopSubmenu {
+  position: absolute;
+  top: calc(100% + 14px);
+  left: -12px;
+  min-width: 170px;
+  background-color: rgba(251, 250, 248, 0.98);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid var(--border-subtle);
+  padding: 8px 0;
+  display: flex;
+  flex-direction: column;
+  z-index: 105;
+  box-shadow: 0 8px 24px rgba(20, 20, 19, 0.06);
+  animation: submenuFade 0.16s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes submenuFade {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.submenuLink {
+  font-family: var(--font-sans);
+  font-size: 0.78rem;
+  font-weight: 450;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  padding: 10px 18px;
+  text-decoration: none;
+  transition: color var(--transition-subtle), background-color var(--transition-subtle);
+  white-space: nowrap;
+}
+
+.submenuLink:hover {
+  color: var(--text-primary);
+  background-color: var(--bg-secondary);
+}
+
+.submenuLinkActive {
+  color: var(--text-primary);
+  font-weight: 600;
+  background-color: rgba(20, 20, 19, 0.03);
 }
 
 /* ==========================================================================
@@ -185,7 +267,7 @@
   z-index: 99;
   display: flex;
   flex-direction: column;
-  padding: 48px var(--gutter-mobile) 40px;
+  padding: 36px var(--gutter-mobile) 40px;
   border-top: 1px solid var(--border-subtle);
   animation: fadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   overflow-y: auto;
@@ -205,7 +287,7 @@
 .mobileNav {
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: 16px;
 }
 
 .mobileNavLink {
@@ -232,11 +314,66 @@
   border-bottom-color: var(--text-primary);
 }
 
+.mobileWorkGroup {
+  display: flex;
+  flex-direction: column;
+}
+
+.mobileWorkTrigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  text-align: left;
+  background: none;
+  cursor: pointer;
+}
+
+.mobileWorkIndicator {
+  font-size: 1.4rem;
+  font-weight: 300;
+  line-height: 1;
+  transition: transform var(--transition-subtle);
+}
+
+.mobileWorkIndicatorOpen {
+  transform: none;
+}
+
+.mobileSubmenu {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px 0 12px 18px;
+  border-bottom: 1px solid var(--border-subtle);
+  animation: fadeIn 0.15s ease-out;
+}
+
+.mobileSubmenuLink {
+  font-family: var(--font-sans);
+  font-size: 1.05rem;
+  font-weight: 400;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  text-decoration: none;
+  padding: 6px 0;
+  transition: color var(--transition-subtle);
+}
+
+.mobileSubmenuLink:hover,
+.mobileSubmenuLinkActive {
+  color: var(--text-primary);
+  font-weight: 550;
+}
+
 /* Reduced Motion */
 @media (prefers-reduced-motion: reduce) {
   .hamburgerBar,
   .mobileOverlay,
-  .mobileNavLink {
+  .mobileNavLink,
+  .desktopSubmenu,
+  .mobileSubmenu {
     transition: none !important;
     animation: none !important;
   }
