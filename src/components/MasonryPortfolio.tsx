@@ -66,15 +66,13 @@ export default function MasonryPortfolio({ items }: { items?: MasonryItem[] } = 
               <div className={styles.itemInner}>
                 <Image
                   src={item.src}
-                  alt={item.title}
+                  alt={item.location}
                   fill
                   sizes="(max-width: 640px) 100vw, (max-width: 960px) 50vw, (max-width: 1360px) 50vw, 680px"
                   className={styles.itemImage}
                   priority={index < 3}
                 />
                 <div className={styles.overlayInfo}>
-                  <span className={styles.categoryBadge}>{item.category}</span>
-                  <h4 className={styles.cardTitle}>{item.title}</h4>
                   <p className={styles.cardLocation}>{item.location}</p>
                 </div>
               </div>

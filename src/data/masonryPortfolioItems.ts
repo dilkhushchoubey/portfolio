@@ -5,7 +5,7 @@ export const masonryPortfolioItems: MasonryItem[] = [
     // 01
     {
         id: '1',
-        title: 'Monochrome Study I',
+        title: 'The Making of a Face',
         category: 'documentary',
         location: 'Kumartuli, Kolkata',
         year: '2024',
@@ -20,9 +20,9 @@ export const masonryPortfolioItems: MasonryItem[] = [
     // 02
     {
         id: '2',
-        title: 'Reflections on the Hooghly',
+        title: 'Mother and Child',
         category: 'portraits',
-        location: 'Howrah Ghat, Kolkata',
+        location: 'Kolkata, India',
         year: '2025',
         src: '/images/homepage/02.JPG?v=ed69701fa8fc',
         width: 1536,
@@ -35,9 +35,9 @@ export const masonryPortfolioItems: MasonryItem[] = [
     // 03
     {
         id: '3',
-        title: 'Divine Veil',
+        title: '',
         category: 'documentary',
-        location: 'Mumbai, India',
+        location: 'Kolkata, India',
         year: '2024',
         src: '/images/homepage/03.jpg?v=30e139e5443f',
         width: 3024,
@@ -51,9 +51,9 @@ export const masonryPortfolioItems: MasonryItem[] = [
     // 04
     {
         id: '4',
-        title: 'The Artisan’s Touch',
+        title: '',
         category: 'documentary',
-        location: 'Kumartuli, Kolkata',
+        location: 'Mullick Ghat, Kolkata',
         year: '2024',
         src: '/images/homepage/04.jpg?v=f36048d9e2d1',
         width: 2448,
@@ -66,7 +66,7 @@ export const masonryPortfolioItems: MasonryItem[] = [
     // 05
     {
         id: '5',
-        title: 'Sacred Form',
+        title: '',
         category: 'documentary',
         location: 'Kumartuli, Kolkata',
         year: '2024',
@@ -81,9 +81,9 @@ export const masonryPortfolioItems: MasonryItem[] = [
     // 06
     {
         id: '6',
-        title: 'Colors of Braj',
+        title: 'Solitude in the Alley',
         category: 'portraits',
-        location: 'Vrindavan, India',
+        location: 'Kolkata, India',
         year: '2024',
         src: '/images/homepage/06.JPG?v=67739cae9b48',
         width: 2781,
@@ -97,9 +97,9 @@ export const masonryPortfolioItems: MasonryItem[] = [
     // 07
     {
         id: '7',
-        title: 'Solitude in the Alley',
+        title: 'A Touch of Devotion',
         category: 'documentary',
-        location: 'Varanasi, India',
+        location: 'Kumartuli, Kolkata',
         year: '2024',
         src: '/images/homepage/07.jpg?v=60f4afcc13fa',
         width: 3393,
@@ -112,9 +112,9 @@ export const masonryPortfolioItems: MasonryItem[] = [
     // 08
     {
         id: '8',
-        title: 'Quiet Transit',
+        title: '',
         category: 'portraits',
-        location: 'Eastern Railway, India',
+        location: 'Kolkata, India',
         year: '2023',
         src: '/images/homepage/08.jpg?v=575b27e7574c',
         width: 2220,
@@ -127,9 +127,9 @@ export const masonryPortfolioItems: MasonryItem[] = [
     // 09
     {
         id: '9',
-        title: 'Incense and Devotion',
+        title: '',
         category: 'documentary',
-        location: 'Varanasi, India',
+        location: 'Gujarat, India',
         year: '2024',
         src: '/images/homepage/09.jpg?v=552ada2ccfbe',
         width: 1536,
@@ -143,9 +143,9 @@ export const masonryPortfolioItems: MasonryItem[] = [
     // 10
     {
         id: '10',
-        title: 'Nomad of Thar',
+        title: '',
         category: 'portraits',
-        location: 'Pushkar, Rajasthan',
+        location: 'Nagpur, India',
         year: '2024',
         src: '/images/homepage/010.jpg?v=6b60d54ae788',
         width: 3223,
@@ -158,9 +158,9 @@ export const masonryPortfolioItems: MasonryItem[] = [
     // 11
     {
         id: '11',
-        title: 'Master Craftsman',
+        title: '',
         category: 'documentary',
-        location: 'Kumartuli, Kolkata',
+        location: 'Kolkata, India',
         year: '2024',
         src: '/images/homepage/011.jpg?v=43d454ea6b8f',
         width: 2754,
@@ -173,7 +173,7 @@ export const masonryPortfolioItems: MasonryItem[] = [
     // 12
     {
         id: '12',
-        title: 'Monsoon Over Howrah',
+        title: 'The Colours of Childhood',
         category: 'landscape',
         location: 'Kolkata, India',
         year: '2024',

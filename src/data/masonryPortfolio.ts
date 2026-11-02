@@ -12,7 +12,7 @@ export type ImageOrientation = 'portrait' | 'landscape' | 'square';
 
 export interface MasonryItem {
   id: string;
-  title: string;
+  title?: string;
   category: 'landscape' | 'portraits' | 'architecture' | 'documentary';
   location: string;
   year?: string;
