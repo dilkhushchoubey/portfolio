@@ -6,7 +6,7 @@ export const masonryPortfolioItems: MasonryItem[] = [
     {
         id: '1',
         title: 'The Making of a Face',
-        category: 'documentary',
+        category: 'Documentary',
         location: 'Kumartuli, Kolkata',
         year: '2024',
         src: '/images/homepage/01.jpg?v=48867a23c592',
@@ -21,7 +21,7 @@ export const masonryPortfolioItems: MasonryItem[] = [
     {
         id: '2',
         title: 'Mother and Child',
-        category: 'portraits',
+        category: 'Street',
         location: 'Kolkata, India',
         year: '2025',
         src: '/images/homepage/02.JPG?v=ed69701fa8fc',
@@ -35,8 +35,8 @@ export const masonryPortfolioItems: MasonryItem[] = [
     // 03
     {
         id: '3',
-        title: '',
-        category: 'documentary',
+        title: 'The Covered Passenger',
+        category: 'Street',
         location: 'Kolkata, India',
         year: '2024',
         src: '/images/homepage/03.jpg?v=30e139e5443f',
@@ -51,8 +51,8 @@ export const masonryPortfolioItems: MasonryItem[] = [
     // 04
     {
         id: '4',
-        title: '',
-        category: 'documentary',
+        title: 'Life by the River',
+        category: 'Street',
         location: 'Mullick Ghat, Kolkata',
         year: '2024',
         src: '/images/homepage/04.jpg?v=f36048d9e2d1',
@@ -66,8 +66,8 @@ export const masonryPortfolioItems: MasonryItem[] = [
     // 05
     {
         id: '5',
-        title: '',
-        category: 'documentary',
+        title: 'The Art of Making',
+        category: 'Documentary',
         location: 'Kumartuli, Kolkata',
         year: '2024',
         src: '/images/homepage/05.JPG?v=21508b12925a',
@@ -82,7 +82,7 @@ export const masonryPortfolioItems: MasonryItem[] = [
     {
         id: '6',
         title: 'Solitude in the Alley',
-        category: 'portraits',
+        category: 'Documentary',
         location: 'Kolkata, India',
         year: '2024',
         src: '/images/homepage/06.JPG?v=67739cae9b48',
@@ -98,7 +98,7 @@ export const masonryPortfolioItems: MasonryItem[] = [
     {
         id: '7',
         title: 'A Touch of Devotion',
-        category: 'documentary',
+        category: 'Documentary',
         location: 'Kumartuli, Kolkata',
         year: '2024',
         src: '/images/homepage/07.jpg?v=60f4afcc13fa',
@@ -112,8 +112,8 @@ export const masonryPortfolioItems: MasonryItem[] = [
     // 08
     {
         id: '8',
-        title: '',
-        category: 'portraits',
+        title: 'An Act of Devotion',
+        category: 'Documentary',
         location: 'Kolkata, India',
         year: '2023',
         src: '/images/homepage/08.jpg?v=575b27e7574c',
@@ -127,8 +127,8 @@ export const masonryPortfolioItems: MasonryItem[] = [
     // 09
     {
         id: '9',
-        title: '',
-        category: 'documentary',
+        title: 'The Man in the Red Turban',
+        category: 'Portraiture',
         location: 'Gujarat, India',
         year: '2024',
         src: '/images/homepage/09.jpg?v=552ada2ccfbe',
@@ -143,8 +143,8 @@ export const masonryPortfolioItems: MasonryItem[] = [
     // 10
     {
         id: '10',
-        title: '',
-        category: 'portraits',
+        title: 'The Divine Presence',
+        category: 'Documentary',
         location: 'Nagpur, India',
         year: '2024',
         src: '/images/homepage/010.jpg?v=6b60d54ae788',
@@ -158,8 +158,8 @@ export const masonryPortfolioItems: MasonryItem[] = [
     // 11
     {
         id: '11',
-        title: '',
-        category: 'documentary',
+        title: 'A Life of Her Own',
+        category: 'Street',
         location: 'Kolkata, India',
         year: '2024',
         src: '/images/homepage/011.jpg?v=43d454ea6b8f',
@@ -174,7 +174,7 @@ export const masonryPortfolioItems: MasonryItem[] = [
     {
         id: '12',
         title: 'The Colours of Childhood',
-        category: 'landscape',
+        category: 'Documentary',
         location: 'Kolkata, India',
         year: '2024',
         src: '/images/homepage/012.JPG?v=668e4a72ae55',
