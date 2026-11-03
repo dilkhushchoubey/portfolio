@@ -1,0 +1,68 @@
+[
+  {
+    "id": "portrait-dscf9774",
+    "src": "/images/portraits/DSCF9774.jpg",
+    "originalFilename": "DSCF9774.jpg",
+    "alt": "Portrait Study I — Photograph by Dilkhush Choubey",
+    "title": "Portrait Study I",
+    "aspectRatio": "3:2",
+    "width": 3587,
+    "height": 2391,
+    "rank": 1,
+    "metadata": {
+      "location": "Varanasi, India",
+      "date": "2023"
+    },
+    "column": "left"
+  },
+  {
+    "id": "portrait-img-1119",
+    "src": "/images/portraits/IMG_1119.jpg",
+    "originalFilename": "IMG_1119.jpg",
+    "alt": "Sacred Garland — Photograph by Dilkhush Choubey",
+    "title": "Sacred Garland",
+    "aspectRatio": "3:4",
+    "width": 3024,
+    "height": 4032,
+    "rank": 2,
+    "metadata": {
+      "location": "Mumbai, India",
+      "date": "2024",
+      "notes": "Devotional portrait during the traditional immersion rites."
+    },
+    "column": "right"
+  },
+  {
+    "id": "portrait-img-4365",
+    "src": "/images/portraits/IMG_4365.JPG",
+    "originalFilename": "IMG_4365.JPG",
+    "alt": "Portrait Study II — Photograph by Dilkhush Choubey",
+    "title": "Portrait Study II",
+    "aspectRatio": "3:4",
+    "width": 4108,
+    "height": 5477,
+    "rank": 3,
+    "metadata": {
+      "location": "Pushkar, Rajasthan",
+      "date": "2024"
+    },
+    "column": "left"
+  },
+  {
+    "id": "portrait-img-9805-2",
+    "src": "/images/portraits/IMG_9805-2.jpg",
+    "originalFilename": "IMG_9805-2.jpg",
+    "alt": "Incense and Devotion — Photograph by Dilkhush Choubey",
+    "title": "Incense and Devotion",
+    "aspectRatio": "3:4",
+    "width": 1536,
+    "height": 2048,
+    "rank": 4,
+    "metadata": {
+      "location": "Varanasi, India",
+      "date": "2024",
+      "notes": "Sanctum dhoop offering sending prayer plumes into the evening dusk."
+    },
+    "column": "right"
+  }
+]

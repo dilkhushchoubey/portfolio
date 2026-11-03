@@ -143,61 +143,70 @@ The homepage displays 12 curated photograph slots in an editorial masonry layout
 
 ---
 
-## 4. How to Add a Portrait
+## 4. How to Add, Rename or Remove Portraits
+
+Portraits are **automatically discovered and synchronized** from the filesystem.
 
 1. **Place the Image File:**
-   Place the photograph file inside:
+   Drop any supported image (`.jpg`, `.jpeg`, `.png`, `.webp`, `.heic`) into:
    ```text
    public/images/portraits/
    ```
-   *Example filename:* `public/images/portraits/monk-of-hemis.jpg` (or `portrait-05.jpg`).
+   *Examples:* `DSCF9774.jpg`, `monk-of-hemis.jpg`, `IMG_4365.JPG`.
 
-2. **Add Metadata in `src/data/portraits.ts`:**
-   Open `src/data/portraits.ts` and add an entry to the `portraitsData` array:
-   ```ts
-   {
-     id: 'portrait-monk-of-hemis',
-     src: '/images/portraits/monk-of-hemis.jpg',
-     alt: 'Elderly Buddhist monk at Hemis Monastery — Portrait photograph by Dilkhush Choubey',
-     title: 'Monk of Hemis',
-     aspectRatio: '3:4', // '3:4' for vertical or '3:2' / '16:9' for horizontal
-     width: 2400,
-     height: 3200,
-     metadata: {
-       location: 'Ladakh, India',
-       date: '2024',
-       notes: 'Morning prayer in the high-altitude courtyard.',
-     },
-   },
+2. **Automatic Synchronization:**
+   - In development mode (`npm run dev`), the live folder watcher automatically registers new, renamed, or deleted files.
+   - For manual sync or build preparation, run `npm run sync-images` or `npm run build`.
+   - Photographs are automatically ordered using natural alphanumeric sorting.
+   - Any added photograph automatically receives an entry and a clean title.
+
+3. **Optional: Curate Titles, Locations & Dates:**
+   To add or edit titles, locations, and dates for portraits, open:
+   ```text
+   src/data/galleryMetadata.json
    ```
-
-3. **Save and Verify:**
-   The new portrait immediately appears on `/work/portraits` and will be viewable in the interactive photograph viewer.
+   Add or update the entry keyed by filename or base stem (e.g. `monk-of-hemis`):
+   ```json
+   "monk-of-hemis": {
+     "title": "Monk of Hemis",
+     "location": "Ladakh, India",
+     "date": "2024",
+     "notes": "Morning prayer in the high-altitude courtyard."
+   }
+   ```
 
 ---
 
-## 5. How to Add a Still
+## 5. How to Add, Rename or Remove Stills
+
+Stills are **automatically discovered and synchronized** from the filesystem, honoring your filename hierarchy priority.
 
 1. **Place the Image File:**
-   Place the photograph file inside:
+   Drop any supported image (`.jpg`, `.jpeg`, `.png`, `.webp`, `.heic`) into:
    ```text
    public/images/stills/
    ```
-   *Example filename:* `public/images/stills/evening-light-on-the-water.jpg` (or `still-09.jpg`).
 
-2. **Add Metadata in `src/data/stills.ts`:**
-   Open `src/data/stills.ts` and add an entry to the `stillsData` array:
-   ```ts
-   {
-     id: 'still-evening-light-on-the-water',
-     src: '/images/stills/evening-light-on-the-water.jpg',
-     alt: 'Golden light reflecting across the Hooghly river at dusk — Photograph by Dilkhush Choubey',
-     title: 'Evening Light on the Water',
-     aspectRatio: '3:2', // '3:2' for horizontal, '3:4' for vertical
-     width: 3600,
-     height: 2400,
-     metadata: {
-       location: 'Kolkata, India',
+2. **Image Hierarchy Suffixes:**
+   Use filename suffixes to control display priority:
+   - Suffix `_1` or `-1` (e.g. `IMG_0091_1.JPG`) → **Priority 1** (comes first)
+   - Suffix `_2` or `-2` (e.g. `IMG_5467_2.jpg`) → **Priority 2** (comes second)
+   - Suffix `_3` or `-3` (e.g. `still-touch-3.jpg`) → **Priority 3** (comes third)
+   - No numeric suffix (e.g. `DSCF9700.jpg`) → **Priority 4** (comes last)
+
+   Within each priority tier, photographs sort naturally by filename.
+
+3. **Optional: Curate Titles, Locations & Dates:**
+   In `src/data/galleryMetadata.json`, add an entry using the base stem (e.g. `IMG_0091`):
+   ```json
+   "IMG_0091": {
+     "title": "Monsoon Over Howrah",
+     "location": "Kolkata, India",
+     "date": "2024",
+     "notes": "Torrential downpour framing vintage state buses below the iconic steel bridge."
+   }
+   ```
+   Renaming the priority suffix (e.g. `IMG_0091_1` to `IMG_0091_2`) automatically preserves the title and metadata.
        date: '2024',
        notes: 'Long exposure of ferry wake under fading twilight.',
      },
