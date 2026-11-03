@@ -14,6 +14,6 @@ export const siteConfig: SiteConfig = {
   social: {
     instagram: 'https://instagram.com/dilkhushchoubey',
     instagramHandle: '@dilkhushchoubey',
-    email: 'contact@dilkhushchoubey.com',
+    email: 'dilkhushchoubey07@gmail.com',
   },
 };

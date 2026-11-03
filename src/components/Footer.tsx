@@ -34,8 +34,8 @@ export default function Footer() {
                 aria-label={`${siteConfig.name} on Instagram`}
               >
                 <svg
-                  width="17"
-                  height="17"
+                  width="21"
+                  height="21"
                   viewBox="0 0 24 24"
                   fill="none"
                   stroke="currentColor"
@@ -56,8 +56,8 @@ export default function Footer() {
                 aria-label={`Email ${siteConfig.name}`}
               >
                 <svg
-                  width="17"
-                  height="17"
+                  width="21"
+                  height="21"
                   viewBox="0 0 24 24"
                   fill="none"
                   stroke="currentColor"

@@ -18,6 +18,8 @@ export interface Photograph {
   width: number;
   height: number;
   metadata?: PhotographMetadata;
+  column?: 'left' | 'right';
+  rank?: number;
 }
 
 export interface Project {

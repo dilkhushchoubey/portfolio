@@ -1,102 +1,86 @@
 .container {
   width: 100%;
+  max-width: 1220px;
+  margin: 0 auto;
+  padding-top: clamp(24px, 3vw, 40px);
 }
 
 /* ==========================================================================
-   PHOTO-BOOK EDITORIAL SEQUENCE SPREADS
+   DESKTOP TWO-COLUMN EDITORIAL GALLERY
+   Two independent vertical columns with a consistent 40-48px central gutter
    ========================================================================== */
-.spreadSingleWide {
+.desktopColumns {
   display: flex;
-  justify-content: center;
-  margin-bottom: clamp(72px, 8vw, 112px);
-}
-
-.singleWideWrapper {
-  max-width: 940px;
+  justify-content: space-between;
+  gap: clamp(40px, 3.5vw, 48px);
   width: 100%;
-  cursor: pointer;
-  outline: none;
-}
-
-.spreadDiptychFacing {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: clamp(32px, 5vw, 68px);
-  max-width: 980px;
-  margin: 0 auto clamp(72px, 8vw, 112px);
-}
-
-.diptychCol {
-  cursor: pointer;
-  outline: none;
-}
-
-.offsetDown {
-  margin-top: clamp(32px, 4vw, 56px);
-}
-
-.spreadSingleMedium {
-  display: flex;
-  justify-content: flex-start;
-  max-width: 1080px;
-  margin: 0 auto clamp(72px, 8vw, 112px);
-}
-
-.singleMediumWrapper {
-  max-width: 820px;
-  width: 100%;
-  cursor: pointer;
-  outline: none;
-}
-
-.spreadDiptychMixed {
-  display: grid;
-  grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
-  gap: clamp(32px, 5vw, 68px);
-  max-width: 1100px;
-  margin: 0 auto clamp(72px, 8vw, 112px);
   align-items: flex-start;
 }
 
-.diptychMixedLeft {
-  cursor: pointer;
-  outline: none;
-}
-
-.diptychMixedRight {
-  cursor: pointer;
-  outline: none;
-  margin-top: clamp(28px, 4vw, 48px);
-}
-
-.spreadSingleIntimate {
+.columnLeft,
+.columnRight {
+  flex: 1 1 0%;
+  min-width: 0;
   display: flex;
-  justify-content: center;
-  margin-bottom: clamp(72px, 8vw, 112px);
+  flex-direction: column;
 }
 
-.singleIntimateWrapper {
-  max-width: 580px;
+/* Base Plate Item Spacing (strictly consistent within each column) */
+.plateItem {
   width: 100%;
+  margin-bottom: clamp(32px, 3vw, 40px);
   cursor: pointer;
   outline: none;
 }
 
-.spreadSingleExpansive {
-  display: flex;
-  justify-content: center;
-  margin-bottom: clamp(60px, 7vw, 96px);
-}
-
-.singleExpansiveWrapper {
-  max-width: 1040px;
-  width: 100%;
-  cursor: pointer;
-  outline: none;
+.plateItem:last-child {
+  margin-bottom: 0;
 }
 
 /* ==========================================================================
-   PLATE ELEMENTS
+   TABLET RESPONSIVENESS (768px to 1023px)
+   Retain two columns with proportionally scaled gutters and spacing
+   ========================================================================== */
+@media (max-width: 1023px) and (min-width: 768px) {
+  .desktopColumns {
+    gap: clamp(28px, 3vw, 36px);
+  }
+
+  .plateItem {
+    margin-bottom: 32px;
+  }
+}
+
+/* ==========================================================================
+   MOBILE SINGLE-COLUMN LAYOUT (< 768px)
+   ========================================================================== */
+.mobileColumns {
+  display: none;
+}
+
+@media (max-width: 767px) {
+  .container {
+    padding-top: 16px;
+  }
+
+  .desktopColumns {
+    display: none;
+  }
+
+  .mobileColumns {
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+    width: 100%;
+  }
+
+  .plateItem {
+    margin-bottom: 0;
+  }
+}
+
+/* ==========================================================================
+   IMAGE FRAME & CAPTION TYPOGRAPHY
    ========================================================================== */
 .imageFrame {
   position: relative;
@@ -113,34 +97,22 @@
   transition: opacity var(--transition-editorial), transform 0.45s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.singleWideWrapper:hover .image,
-.diptychCol:hover .image,
-.singleMediumWrapper:hover .image,
-.diptychMixedLeft:hover .image,
-.diptychMixedRight:hover .image,
-.singleIntimateWrapper:hover .image,
-.singleExpansiveWrapper:hover .image {
+.plateItem:hover .image {
   opacity: 0.94;
   transform: scale(1.012);
 }
 
-.singleWideWrapper:focus-visible,
-.diptychCol:focus-visible,
-.singleMediumWrapper:focus-visible,
-.diptychMixedLeft:focus-visible,
-.diptychMixedRight:focus-visible,
-.singleIntimateWrapper:focus-visible,
-.singleExpansiveWrapper:focus-visible {
+.plateItem:focus-visible {
   outline: 1.5px solid var(--text-primary);
   outline-offset: 4px;
 }
 
 .plateCaption {
-  margin-top: 12px;
+  margin-top: 11px;
   display: flex;
   align-items: baseline;
   justify-content: space-between;
-  gap: 8px;
+  gap: 12px;
   flex-wrap: wrap;
 }
 
@@ -160,34 +132,13 @@
   color: var(--text-muted);
 }
 
-/* Mobile Responsiveness */
-@media (max-width: 768px) {
-  .spreadSingleWide,
-  .spreadDiptychFacing,
-  .spreadSingleMedium,
-  .spreadDiptychMixed,
-  .spreadSingleIntimate,
-  .spreadSingleExpansive {
-    margin-bottom: 56px;
-  }
-
-  .spreadDiptychFacing,
-  .spreadDiptychMixed {
-    display: flex;
-    flex-direction: column;
-    gap: 48px;
-  }
-
-  .offsetDown,
-  .diptychMixedRight {
-    margin-top: 0;
-  }
-
+@media (max-width: 767px) {
   .plateCaption {
-    margin-top: 8px;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 3px;
+    margin-top: 9px;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 8px;
   }
 
   .photoTitle {
@@ -198,4 +149,3 @@
     font-size: 0.65rem;
   }
 }
-

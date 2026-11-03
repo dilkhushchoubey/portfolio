@@ -36,7 +36,7 @@ export const masonryPortfolioItems: MasonryItem[] = [
     {
         id: '3',
         title: 'The Covered Passenger',
-        category: 'Street',
+        category: 'Portraiture',
         location: 'Kolkata, India',
         year: '2024',
         src: '/images/homepage/03.jpg?v=30e139e5443f',
