@@ -87,13 +87,13 @@ function computeAspectRatio(width, height) {
 }
 
 /**
- * Extracts hierarchy priority for Stills:
+ * Extracts hierarchy priority for gallery items:
  * 1: suffix 1 (_1, -1)
  * 2: suffix 2 (_2, -2)
  * 3: suffix 3 (_3, -3)
  * 4: no numeric suffix
  */
-function getStillsPriority(filename) {
+export function getFilenamePriority(filename) {
   const match = filename.match(/[_-](\d+)\.[^.]+$/);
   if (!match) return 4;
   const num = parseInt(match[1], 10);
@@ -173,8 +173,11 @@ function cleanOrphanedWebFiles(folder, activeFiles) {
 
 /**
  * Scans an image directory and returns sorted photographs.
+ * Applies the exact filename priority hierarchy to all galleries:
+ * Priority 1 (ends in 1) -> Priority 2 (ends in 2) -> Priority 3 (ends in 3) -> Priority 4 (no suffix)
+ * Within each priority group, uses natural filename ordering.
  */
-async function processGalleryFolder(folderName, folderPath, sortMode, registry) {
+async function processGalleryFolder(folderName, folderPath, registry) {
   if (!fs.existsSync(folderPath)) {
     console.warn(`[sync-galleries] Folder not found: ${folderPath}`);
     return [];
@@ -190,20 +193,13 @@ async function processGalleryFolder(folderName, folderPath, sortMode, registry) 
   // Clean up any orphaned derived files
   cleanOrphanedWebFiles(folderName, validFiles);
 
-  // Sorting
-  if (sortMode === 'stills-priority') {
-    validFiles.sort((a, b) => {
-      const prioA = getStillsPriority(a);
-      const prioB = getStillsPriority(b);
-      if (prioA !== prioB) return prioA - prioB;
-      return a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' });
-    });
-  } else {
-    // Natural alphanumeric sorting
-    validFiles.sort((a, b) =>
-      a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' })
-    );
-  }
+  // Universal priority sorting for both Stills and Portraits
+  validFiles.sort((a, b) => {
+    const prioA = getFilenamePriority(a);
+    const prioB = getFilenamePriority(b);
+    if (prioA !== prioB) return prioA - prioB;
+    return a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' });
+  });
 
   const items = [];
 
@@ -316,7 +312,6 @@ export async function syncGalleries() {
   const stills = await processGalleryFolder(
     'stills',
     stillsDir,
-    'stills-priority',
     registry
   );
   const stillsManifestPath = path.join(generatedDir, 'stills.manifest.json');
@@ -326,7 +321,6 @@ export async function syncGalleries() {
   const portraits = await processGalleryFolder(
     'portraits',
     portraitsDir,
-    'natural',
     registry
   );
   const portraitsManifestPath = path.join(generatedDir, 'portraits.manifest.json');

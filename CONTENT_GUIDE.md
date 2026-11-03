@@ -145,33 +145,40 @@ The homepage displays 12 curated photograph slots in an editorial masonry layout
 
 ## 4. How to Add, Rename or Remove Portraits
 
-Portraits are **automatically discovered and synchronized** from the filesystem.
+Portraits are **automatically discovered and synchronized** from the filesystem, honoring your filename hierarchy priority.
 
 1. **Place the Image File:**
    Drop any supported image (`.jpg`, `.jpeg`, `.png`, `.webp`, `.heic`) into:
    ```text
    public/images/portraits/
    ```
-   *Examples:* `DSCF9774.jpg`, `monk-of-hemis.jpg`, `IMG_4365.JPG`.
+   *Examples:* `DSCF9774_1.jpg`, `IMG_9805_1.jpg`, `IMG_1119_2.jpg`, `IMG_4365.JPG`.
 
-2. **Automatic Synchronization:**
+2. **Image Hierarchy Suffixes:**
+   Use filename suffixes to control display priority:
+   - Suffix `_1` or `-1` (e.g. `DSCF9774_1.jpg`) → **Priority 1** (comes first)
+   - Suffix `_2` or `-2` (e.g. `IMG_1119_2.jpg`) → **Priority 2** (comes second)
+   - Suffix `_3` or `-3` (e.g. `portrait_3.jpg`) → **Priority 3** (comes third)
+   - No numeric suffix (e.g. `IMG_4365.JPG`) → **Priority 4** (comes last)
+
+   Within each priority tier, photographs sort naturally by filename.
+
+3. **Automatic Synchronization:**
    - In development mode (`npm run dev`), the live folder watcher automatically registers new, renamed, or deleted files.
    - For manual sync or build preparation, run `npm run sync-images` or `npm run build`.
-   - Photographs are automatically ordered using natural alphanumeric sorting.
-   - Any added photograph automatically receives an entry and a clean title.
+   - Any newly added photograph automatically receives an entry and a clean title.
 
-3. **Optional: Curate Titles, Locations & Dates:**
+4. **Optional: Curate Titles, Locations & Dates:**
    To add or edit titles, locations, and dates for portraits, open:
    ```text
    src/data/galleryMetadata.json
    ```
-   Add or update the entry keyed by filename or base stem (e.g. `monk-of-hemis`):
+   Add or update the entry keyed by base stem (e.g. `DSCF9774`):
    ```json
-   "monk-of-hemis": {
-     "title": "Monk of Hemis",
-     "location": "Ladakh, India",
-     "date": "2024",
-     "notes": "Morning prayer in the high-altitude courtyard."
+   "DSCF9774": {
+     "title": "Portrait Study I",
+     "location": "Varanasi, India",
+     "date": "2023"
    }
    ```
 

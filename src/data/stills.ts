@@ -29,8 +29,8 @@ export const stillsData: Photograph[] = rawManifest as Photograph[];
  */
 export function getStillsPhotographs(): Photograph[] {
   return [...stillsData].sort((a, b) => {
-    const prioA = getFilenamePriority(a.src);
-    const prioB = getFilenamePriority(b.src);
+    const prioA = getFilenamePriority(a.originalFilename || a.src);
+    const prioB = getFilenamePriority(b.originalFilename || b.src);
     if (prioA !== prioB) {
       return prioA - prioB;
     }

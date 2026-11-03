@@ -12,6 +12,7 @@ export interface PhotographMetadata {
 export interface Photograph {
   id: string;
   src: string;
+  originalFilename?: string;
   alt: string;
   title?: string;
   aspectRatio: AspectRatio;

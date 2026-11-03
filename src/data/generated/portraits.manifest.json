@@ -16,21 +16,38 @@
     "column": "left"
   },
   {
-    "id": "portrait-img-1119-1",
-    "src": "/images/portraits/IMG_1119_1.jpg",
-    "originalFilename": "IMG_1119_1.jpg",
+    "id": "portrait-img-9805-1",
+    "src": "/images/portraits/IMG_9805_1.jpg",
+    "originalFilename": "IMG_9805_1.jpg",
+    "alt": "Incense and Devotion — Photograph by Dilkhush Choubey",
+    "title": "Incense and Devotion",
+    "aspectRatio": "3:4",
+    "width": 1536,
+    "height": 2048,
+    "rank": 2,
+    "metadata": {
+      "location": "Varanasi, India",
+      "date": "2024",
+      "notes": "Sanctum dhoop offering sending prayer plumes into the evening dusk."
+    },
+    "column": "right"
+  },
+  {
+    "id": "portrait-img-1119-2",
+    "src": "/images/portraits/IMG_1119_2.jpg",
+    "originalFilename": "IMG_1119_2.jpg",
     "alt": "Sacred Garland — Photograph by Dilkhush Choubey",
     "title": "Sacred Garland",
     "aspectRatio": "3:4",
     "width": 3024,
     "height": 4032,
-    "rank": 2,
+    "rank": 3,
     "metadata": {
       "location": "Mumbai, India",
       "date": "2024",
       "notes": "Devotional portrait during the traditional immersion rites."
     },
-    "column": "right"
+    "column": "left"
   },
   {
     "id": "portrait-img-4365",
@@ -41,27 +58,10 @@
     "aspectRatio": "3:4",
     "width": 4108,
     "height": 5477,
-    "rank": 3,
+    "rank": 4,
     "metadata": {
       "location": "Pushkar, Rajasthan",
       "date": "2024"
-    },
-    "column": "left"
-  },
-  {
-    "id": "portrait-img-9805-1",
-    "src": "/images/portraits/IMG_9805_1.jpg",
-    "originalFilename": "IMG_9805_1.jpg",
-    "alt": "Incense and Devotion — Photograph by Dilkhush Choubey",
-    "title": "Incense and Devotion",
-    "aspectRatio": "3:4",
-    "width": 1536,
-    "height": 2048,
-    "rank": 4,
-    "metadata": {
-      "location": "Varanasi, India",
-      "date": "2024",
-      "notes": "Sanctum dhoop offering sending prayer plumes into the evening dusk."
     },
     "column": "right"
   }
