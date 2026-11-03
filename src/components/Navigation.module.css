@@ -1,7 +1,7 @@
 /* ==========================================================================
    HEADER & NAVIGATION
    Desktop: Horizontal links with expandable Work submenu
-   Mobile (<= 768px): Minimalist editorial hamburger button & expandable drawer
+   Mobile (<= 768px): Minimalist refined editorial hamburger drawer
    ========================================================================== */
 
 .header {
@@ -11,9 +11,7 @@
   right: 0;
   z-index: 100;
   height: var(--header-height);
-  background-color: rgba(251, 250, 248, 0.94);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  background-color: var(--bg-primary);
   border-bottom: 1px solid var(--border-subtle);
   transition: border-color var(--transition-subtle);
 }
@@ -78,7 +76,7 @@
 }
 
 /* ==========================================================================
-   DESKTOP HORIZONTAL NAVIGATION
+   DESKTOP HORIZONTAL NAVIGATION (PRESERVED)
    ========================================================================== */
 .desktopNav {
   display: flex;
@@ -151,9 +149,7 @@
   top: calc(100% + 14px);
   left: -12px;
   min-width: 170px;
-  background-color: rgba(251, 250, 248, 0.98);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
+  background-color: var(--bg-primary);
   border: 1px solid var(--border-subtle);
   padding: 8px 0;
   display: flex;
@@ -199,7 +195,7 @@
 }
 
 /* ==========================================================================
-   HAMBURGER BUTTON (Hidden on desktop, active <= 768px)
+   HAMBURGER BUTTON (Active <= 768px, transforms into X when open)
    ========================================================================== */
 .hamburgerButton {
   display: none;
@@ -252,7 +248,7 @@
 }
 
 /* ==========================================================================
-   MOBILE NAVIGATION DRAWER OVERLAY
+   MOBILE NAVIGATION DRAWER OVERLAY (REFINED MINIMAL EDITORIAL)
    ========================================================================== */
 .mobileOverlay {
   position: fixed;
@@ -261,119 +257,97 @@
   right: 0;
   bottom: 0;
   height: calc(100vh - var(--header-height));
-  background-color: rgba(251, 250, 248, 0.98);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
+  background-color: var(--bg-primary); /* Clean solid background matching site */
   z-index: 99;
   display: flex;
   flex-direction: column;
-  padding: 36px var(--gutter-mobile) 40px;
-  border-top: 1px solid var(--border-subtle);
-  animation: fadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  padding: 24px var(--gutter-mobile) 36px;
   overflow-y: auto;
-}
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(-6px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  -webkit-overflow-scrolling: touch;
 }
 
 .mobileNav {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  width: 100%;
 }
 
-.mobileNavLink {
-  font-family: var(--font-sans);
-  font-size: 1.3rem;
-  font-weight: 450;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--text-secondary);
-  text-decoration: none;
-  padding: 8px 0;
-  transition: color var(--transition-subtle);
+/* Navigation Sections with thin subtle dividers */
+.mobileNavSection {
+  padding: 16px 0;
   border-bottom: 1px solid var(--border-subtle);
-}
-
-.mobileNavLink:hover,
-.mobileNavLink:focus-visible {
-  color: var(--text-primary);
-}
-
-.mobileNavLinkActive {
-  color: var(--text-primary);
-  font-weight: 550;
-  border-bottom-color: var(--text-primary);
-}
-
-.mobileWorkGroup {
   display: flex;
   flex-direction: column;
 }
 
-.mobileWorkTrigger {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  width: 100%;
-  text-align: left;
-  background: none;
-  cursor: pointer;
+/* Section Headings (WORK) */
+.mobileSectionHeading {
+  font-family: var(--font-sans);
+  font-size: 0.86rem;
+  font-weight: 550;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-primary);
+  line-height: 1.3;
+  margin-bottom: 12px;
 }
 
-.mobileWorkIndicator {
-  font-size: 1.4rem;
-  font-weight: 300;
-  line-height: 1;
-  transition: transform var(--transition-subtle);
-}
-
-.mobileWorkIndicatorOpen {
-  transform: none;
-}
-
+/* Always visible Submenu (Projects, Portraits, Stills) */
 .mobileSubmenu {
   display: flex;
   flex-direction: column;
   gap: 10px;
-  padding: 12px 0 12px 18px;
-  border-bottom: 1px solid var(--border-subtle);
-  animation: fadeIn 0.15s ease-out;
+  padding-left: 10px;
 }
 
 .mobileSubmenuLink {
   font-family: var(--font-sans);
-  font-size: 1.05rem;
+  font-size: 0.76rem;
   font-weight: 400;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.11em;
   text-transform: uppercase;
   color: var(--text-secondary);
   text-decoration: none;
-  padding: 6px 0;
+  padding: 3px 0;
   transition: color var(--transition-subtle);
 }
 
-.mobileSubmenuLink:hover,
+.mobileSubmenuLink:hover {
+  color: var(--text-primary);
+}
+
 .mobileSubmenuLinkActive {
   color: var(--text-primary);
   font-weight: 550;
+}
+
+/* Main Section Links (ABOUT, CONTACT) */
+.mobileNavLink {
+  font-family: var(--font-sans);
+  font-size: 0.86rem;
+  font-weight: 550;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-primary);
+  text-decoration: none;
+  line-height: 1.3;
+  transition: color var(--transition-subtle), opacity var(--transition-subtle);
+}
+
+.mobileNavLink:hover {
+  opacity: 0.75;
+}
+
+.mobileNavLinkActive {
+  color: var(--text-primary);
+  font-weight: 600;
 }
 
 /* Reduced Motion */
 @media (prefers-reduced-motion: reduce) {
   .hamburgerBar,
   .mobileOverlay,
-  .mobileNavLink,
-  .desktopSubmenu,
-  .mobileSubmenu {
+  .desktopSubmenu {
     transition: none !important;
     animation: none !important;
   }

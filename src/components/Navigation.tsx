@@ -9,7 +9,6 @@ import styles from './Navigation.module.css';
 export default function Navigation() {
   const [isOpen, setIsOpen] = useState(false);
   const [isWorkOpen, setIsWorkOpen] = useState(false);
-  const [isMobileWorkOpen, setIsMobileWorkOpen] = useState(true); // Open by default in mobile drawer for easy discovery
   const pathname = usePathname();
   const [prevPathname, setPrevPathname] = useState(pathname);
 
@@ -196,7 +195,7 @@ export default function Navigation() {
           </Link>
         </nav>
 
-        {/* Mobile Hamburger Button */}
+        {/* Mobile Hamburger Button (transforms into close X icon when open) */}
         <button
           ref={buttonRef}
           type="button"
@@ -225,75 +224,61 @@ export default function Navigation() {
           aria-label="Mobile Navigation"
         >
           <nav className={styles.mobileNav}>
-            {/* Expandable Work Accordion Item */}
-            <div className={styles.mobileWorkGroup}>
-              <button
-                type="button"
-                className={`${styles.mobileNavLink} ${styles.mobileWorkTrigger} ${
-                  isWorkActive ? styles.mobileNavLinkActive : ''
-                }`}
-                onClick={() => setIsMobileWorkOpen((prev) => !prev)}
-                aria-expanded={isMobileWorkOpen}
-              >
-                <span>Work</span>
-                <span
-                  className={`${styles.mobileWorkIndicator} ${
-                    isMobileWorkOpen ? styles.mobileWorkIndicatorOpen : ''
-                  }`}
-                  aria-hidden="true"
-                >
-                  {isMobileWorkOpen ? '−' : '+'}
-                </span>
-              </button>
+            {/* WORK Section: Always visible submenu links directly below */}
+            <div className={styles.mobileNavSection}>
+              <span className={styles.mobileSectionHeading}>Work</span>
+              <div className={styles.mobileSubmenu}>
+                {workSubmenu.map((sub) => {
+                  const isSubActive =
+                    sub.href === '/work/projects'
+                      ? pathname === '/work/projects' ||
+                        pathname === '/work' ||
+                        (pathname.startsWith('/work/') &&
+                          pathname !== '/work/portraits' &&
+                          pathname !== '/work/stills')
+                      : pathname === sub.href;
 
-              {isMobileWorkOpen && (
-                <div className={styles.mobileSubmenu}>
-                  {workSubmenu.map((sub) => {
-                    const isSubActive =
-                      sub.href === '/work/projects'
-                        ? pathname === '/work/projects' ||
-                          pathname === '/work' ||
-                          (pathname.startsWith('/work/') &&
-                            pathname !== '/work/portraits' &&
-                            pathname !== '/work/stills')
-                        : pathname === sub.href;
-
-                    return (
-                      <Link
-                        key={sub.href}
-                        href={sub.href}
-                        onClick={closeMenu}
-                        className={`${styles.mobileSubmenuLink} ${
-                          isSubActive ? styles.mobileSubmenuLinkActive : ''
-                        }`}
-                      >
-                        {sub.label}
-                      </Link>
-                    );
-                  })}
-                </div>
-              )}
+                  return (
+                    <Link
+                      key={sub.href}
+                      href={sub.href}
+                      onClick={closeMenu}
+                      className={`${styles.mobileSubmenuLink} ${
+                        isSubActive ? styles.mobileSubmenuLinkActive : ''
+                      }`}
+                    >
+                      {sub.label}
+                    </Link>
+                  );
+                })}
+              </div>
             </div>
 
-            <Link
-              href="/about"
-              onClick={closeMenu}
-              className={`${styles.mobileNavLink} ${
-                pathname === '/about' ? styles.mobileNavLinkActive : ''
-              }`}
-            >
-              About
-            </Link>
+            {/* ABOUT Section */}
+            <div className={styles.mobileNavSection}>
+              <Link
+                href="/about"
+                onClick={closeMenu}
+                className={`${styles.mobileNavLink} ${
+                  pathname === '/about' ? styles.mobileNavLinkActive : ''
+                }`}
+              >
+                About
+              </Link>
+            </div>
 
-            <Link
-              href="/contact"
-              onClick={closeMenu}
-              className={`${styles.mobileNavLink} ${
-                pathname === '/contact' ? styles.mobileNavLinkActive : ''
-              }`}
-            >
-              Contact
-            </Link>
+            {/* CONTACT Section */}
+            <div className={styles.mobileNavSection}>
+              <Link
+                href="/contact"
+                onClick={closeMenu}
+                className={`${styles.mobileNavLink} ${
+                  pathname === '/contact' ? styles.mobileNavLinkActive : ''
+                }`}
+              >
+                Contact
+              </Link>
+            </div>
           </nav>
         </div>
       )}
