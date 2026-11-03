@@ -14,6 +14,7 @@ All photographic assets and data structures are strictly modular. Each section o
 | **Projects** | `public/images/projects/[slug]/` | `src/data/projects.ts` | Complete photographic series & stories |
 | **Portraits** | `public/images/portraits/` | `src/data/portraits.ts` | Individual standalone portraits |
 | **Stills** | `public/images/stills/` | `src/data/stills.ts` | Standalone non-portrait photographs |
+| **About** | `public/images/about/portrait/` & `additional/` | `src/data/about.ts` | Photographer portrait & About assets |
 
 ---
 
