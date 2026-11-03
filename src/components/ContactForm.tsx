@@ -18,6 +18,8 @@ export default function ContactForm() {
     message: '',
   });
 
+  const [honeypot, setHoneypot] = useState('');
+  const [submittedInfo, setSubmittedInfo] = useState<{ name: string; email: string } | null>(null);
   const [errors, setErrors] = useState<Partial<Record<keyof FormData, string>>>({});
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
   const [errorMessage, setErrorMessage] = useState('');
@@ -27,7 +29,7 @@ export default function ContactForm() {
     const newErrors: Partial<Record<keyof FormData, string>> = {};
 
     if (!formData.name.trim() || formData.name.trim().length < 2) {
-      newErrors.name = 'Please enter your name.';
+      newErrors.name = 'Please enter your name (at least 2 characters).';
     }
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -73,30 +75,49 @@ export default function ContactForm() {
       const res = await fetch('/api/contact', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({
+          ...formData,
+          _gotcha: honeypot,
+        }),
       });
 
       const data = await res.json().catch(() => ({}));
 
       if (res.ok && data?.success) {
+        // Save submission context for the confirmation view
+        setSubmittedInfo({
+          name: formData.name.trim(),
+          email: formData.email.trim(),
+        });
+        // Clear form only on success
+        setFormData({ name: '', email: '', subject: '', message: '' });
+        setHoneypot('');
+        setErrors({});
         setStatus('success');
       } else {
+        // Preserve entered information on failure
         setStatus('error');
         setErrorMessage(
           data?.error ||
             'Failed to deliver message. Please try again or reach out directly.'
         );
-        if (data?.fallbackMailto) {
-          setFallbackMailto(data.fallbackMailto);
+        if (data?.isConfigError) {
+          const fallback = `mailto:dilkhushchoubey07@gmail.com?subject=${encodeURIComponent(
+            `Portfolio enquiry: ${formData.subject}`
+          )}&body=${encodeURIComponent(
+            `Name: ${formData.name}\nEmail: ${formData.email}\n\n${formData.message}`
+          )}`;
+          setFallbackMailto(fallback);
         }
       }
     } catch {
+      // Preserve entered information on failure
       setStatus('error');
       setErrorMessage(
         'A network connection error occurred while sending. You can reach out directly via email.'
       );
       const fallback = `mailto:dilkhushchoubey07@gmail.com?subject=${encodeURIComponent(
-        `[Portfolio Enquiry] ${formData.subject}`
+        `Portfolio enquiry: ${formData.subject}`
       )}&body=${encodeURIComponent(
         `Name: ${formData.name}\nEmail: ${formData.email}\n\n${formData.message}`
       )}`;
@@ -106,6 +127,8 @@ export default function ContactForm() {
 
   const handleReset = () => {
     setFormData({ name: '', email: '', subject: '', message: '' });
+    setHoneypot('');
+    setSubmittedInfo(null);
     setErrors({});
     setStatus('idle');
     setErrorMessage('');
@@ -117,8 +140,8 @@ export default function ContactForm() {
       <div className={styles.successBox} role="status" aria-live="polite">
         <h2 className={styles.successTitle}>Message Received</h2>
         <p className={styles.successText}>
-          Thank you, {formData.name}. Your enquiry has been received. I will
-          respond to you at {formData.email} as soon as possible.
+          Thank you, {submittedInfo?.name || 'there'}. Your enquiry has been received. I will
+          respond to you at {submittedInfo?.email} as soon as possible.
         </p>
         <button
           type="button"
@@ -134,6 +157,20 @@ export default function ContactForm() {
   return (
     <div className={styles.formWrapper}>
       <form onSubmit={handleSubmit} className={styles.form} noValidate>
+        {/* Anti-spam honeypot (invisible to real visitors) */}
+        <div className={styles.visuallyHidden} aria-hidden="true">
+          <label htmlFor="contact-botcheck">Leave this field blank</label>
+          <input
+            id="contact-botcheck"
+            type="text"
+            name="_gotcha"
+            tabIndex={-1}
+            autoComplete="off"
+            value={honeypot}
+            onChange={(e) => setHoneypot(e.target.value)}
+          />
+        </div>
+
         {/* Row 1: Name & Email side-by-side on desktop */}
         <div className={styles.row}>
           <div className={styles.fieldGroup}>
@@ -265,4 +302,3 @@ export default function ContactForm() {
     </div>
   );
 }
-
