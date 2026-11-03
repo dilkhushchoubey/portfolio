@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { siteConfig } from '@/data/siteConfig';
@@ -15,6 +15,9 @@ export default function Navigation() {
   const menuRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
   const desktopWorkRef = useRef<HTMLDivElement>(null);
+  const isTransitioningRef = useRef(false);
+  const unlockTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const isFirstRender = useRef(true);
 
   // Close menus when route changes
   if (prevPathname !== pathname) {
@@ -31,81 +34,145 @@ export default function Navigation() {
     { label: 'Stills', href: '/work/stills' },
   ];
 
-  // Handle keyboard Escape, outside click, and body scroll lock for mobile menu
-  useEffect(() => {
-    if (!isOpen) return;
+  // Stable action handlers
+  const closeMenu = useCallback(() => {
+    if (isTransitioningRef.current) return;
+    isTransitioningRef.current = true;
+    setIsOpen(false);
+    setIsWorkOpen(false);
+    setTimeout(() => {
+      isTransitioningRef.current = false;
+    }, 320);
+  }, []);
 
-    const handleKeyDown = (e: KeyboardEvent) => {
+  const toggleMenu = useCallback(() => {
+    if (isTransitioningRef.current) return;
+    isTransitioningRef.current = true;
+    setIsOpen((prev) => !prev);
+    setTimeout(() => {
+      isTransitioningRef.current = false;
+    }, 320);
+  }, []);
+
+  const toggleWorkSubmenu = useCallback(() => {
+    setIsWorkOpen((prev) => !prev);
+  }, []);
+
+  // Event handlers moved outside effects with useCallback
+  const handleMobileKeyDown = useCallback(
+    (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
-        setIsOpen(false);
+        closeMenu();
         buttonRef.current?.focus();
       }
-    };
+    },
+    [closeMenu]
+  );
 
-    const handleClickOutside = (e: MouseEvent) => {
+  const handleMobileClickOutside = useCallback(
+    (e: MouseEvent) => {
       if (
         menuRef.current &&
         !menuRef.current.contains(e.target as Node) &&
         buttonRef.current &&
         !buttonRef.current.contains(e.target as Node)
       ) {
-        setIsOpen(false);
+        closeMenu();
       }
-    };
+    },
+    [closeMenu]
+  );
 
-    window.addEventListener('keydown', handleKeyDown);
-    document.addEventListener('mousedown', handleClickOutside);
+  const handleResize = useCallback(() => {
+    if (window.innerWidth > 768) {
+      closeMenu();
+    }
+  }, [closeMenu]);
 
-    const originalOverflow = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
+  const handleDesktopClickOutside = useCallback((e: MouseEvent) => {
+    if (
+      desktopWorkRef.current &&
+      !desktopWorkRef.current.contains(e.target as Node)
+    ) {
+      setIsWorkOpen(false);
+    }
+  }, []);
+
+  const handleDesktopKeyDown = useCallback((e: KeyboardEvent) => {
+    if (e.key === 'Escape') {
+      setIsWorkOpen(false);
+    }
+  }, []);
+
+  // Effect 1: Mobile drawer Escape key and outside click listeners
+  useEffect(() => {
+    if (!isOpen) return;
+
+    window.addEventListener('keydown', handleMobileKeyDown);
+    document.addEventListener('mousedown', handleMobileClickOutside);
 
     return () => {
-      window.removeEventListener('keydown', handleKeyDown);
-      document.removeEventListener('mousedown', handleClickOutside);
-      document.body.style.overflow = originalOverflow;
+      window.removeEventListener('keydown', handleMobileKeyDown);
+      document.removeEventListener('mousedown', handleMobileClickOutside);
+    };
+  }, [isOpen, handleMobileKeyDown, handleMobileClickOutside]);
+
+  // Effect 3: Body scroll locking and smooth unlock on close (280ms exit animation)
+  useEffect(() => {
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      return;
+    }
+
+    if (isOpen) {
+      if (unlockTimerRef.current) {
+        clearTimeout(unlockTimerRef.current);
+        unlockTimerRef.current = null;
+      }
+      document.body.style.overflow = 'hidden';
+    } else {
+      unlockTimerRef.current = setTimeout(() => {
+        document.body.style.overflow = '';
+        unlockTimerRef.current = null;
+      }, 280);
+    }
+
+    return () => {
+      if (unlockTimerRef.current) {
+        clearTimeout(unlockTimerRef.current);
+      }
     };
   }, [isOpen]);
 
-  // Handle outside click & escape for desktop Work submenu
+  // Clean up body scroll on unmount if menu was open
+  useEffect(() => {
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, []);
+
+  // Effect 4: Close mobile drawer on desktop resize
+  useEffect(() => {
+    if (!isOpen) return;
+
+    window.addEventListener('resize', handleResize);
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    };
+  }, [isOpen, handleResize]);
+
+  // Effect 5: Desktop Work submenu outside click & escape listeners
   useEffect(() => {
     if (!isWorkOpen) return;
 
-    const handleClickOutside = (e: MouseEvent) => {
-      if (
-        desktopWorkRef.current &&
-        !desktopWorkRef.current.contains(e.target as Node)
-      ) {
-        setIsWorkOpen(false);
-      }
-    };
-
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        setIsWorkOpen(false);
-      }
-    };
-
-    document.addEventListener('mousedown', handleClickOutside);
-    window.addEventListener('keydown', handleKeyDown);
+    document.addEventListener('mousedown', handleDesktopClickOutside);
+    window.addEventListener('keydown', handleDesktopKeyDown);
 
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-      window.removeEventListener('keydown', handleKeyDown);
+      document.removeEventListener('mousedown', handleDesktopClickOutside);
+      window.removeEventListener('keydown', handleDesktopKeyDown);
     };
-  }, [isWorkOpen]);
-
-  const toggleMenu = () => {
-    setIsOpen((prev) => !prev);
-  };
-
-  const closeMenu = () => {
-    setIsOpen(false);
-    setIsWorkOpen(false);
-  };
-
-  const toggleWorkSubmenu = () => {
-    setIsWorkOpen((prev) => !prev);
-  };
+  }, [isWorkOpen, handleDesktopClickOutside, handleDesktopKeyDown]);
 
   return (
     <header className={styles.header}>
@@ -119,7 +186,7 @@ export default function Navigation() {
           <span className={styles.brandName}>{siteConfig.name}</span>
         </Link>
 
-        {/* Desktop Horizontal Navigation */}
+        {/* Desktop Horizontal Navigation (Preserved) */}
         <nav className={styles.desktopNav} aria-label="Main Navigation">
           {/* Expandable Work Navigation Item */}
           <div className={styles.workNavWrapper} ref={desktopWorkRef}>
@@ -213,75 +280,80 @@ export default function Navigation() {
         </button>
       </div>
 
-      {/* Mobile Navigation Drawer */}
-      {isOpen && (
-        <div
-          ref={menuRef}
-          id="mobile-navigation"
-          className={styles.mobileOverlay}
-          role="dialog"
-          aria-modal="true"
-          aria-label="Mobile Navigation"
+      {/* Mobile Navigation Drawer (smooth opening and closing transitions) */}
+      <div
+        ref={menuRef}
+        id="mobile-navigation"
+        className={`${styles.mobileOverlay} ${
+          isOpen ? styles.mobileOverlayOpen : ''
+        }`}
+        role="dialog"
+        aria-modal={isOpen}
+        aria-hidden={!isOpen}
+        aria-label="Mobile Navigation"
+      >
+        <nav
+          className={`${styles.mobileNav} ${
+            isOpen ? styles.mobileNavOpen : ''
+          }`}
         >
-          <nav className={styles.mobileNav}>
-            {/* WORK Section: Always visible submenu links directly below */}
-            <div className={styles.mobileNavSection}>
-              <span className={styles.mobileSectionHeading}>Work</span>
-              <div className={styles.mobileSubmenu}>
-                {workSubmenu.map((sub) => {
-                  const isSubActive =
-                    sub.href === '/work/projects'
-                      ? pathname === '/work/projects' ||
-                        pathname === '/work' ||
-                        (pathname.startsWith('/work/') &&
-                          pathname !== '/work/portraits' &&
-                          pathname !== '/work/stills')
-                      : pathname === sub.href;
+          {/* WORK Section: Always visible submenu links directly below */}
+          <div className={styles.mobileNavSection}>
+            <span className={styles.mobileSectionHeading}>Work</span>
+            <div className={styles.mobileSubmenu}>
+              {workSubmenu.map((sub) => {
+                const isSubActive =
+                  sub.href === '/work/projects'
+                    ? pathname === '/work/projects' ||
+                      pathname === '/work' ||
+                      (pathname.startsWith('/work/') &&
+                        pathname !== '/work/portraits' &&
+                        pathname !== '/work/stills')
+                    : pathname === sub.href;
 
-                  return (
-                    <Link
-                      key={sub.href}
-                      href={sub.href}
-                      onClick={closeMenu}
-                      className={`${styles.mobileSubmenuLink} ${
-                        isSubActive ? styles.mobileSubmenuLinkActive : ''
-                      }`}
-                    >
-                      {sub.label}
-                    </Link>
-                  );
-                })}
-              </div>
+                return (
+                  <Link
+                    key={sub.href}
+                    href={sub.href}
+                    onClick={closeMenu}
+                    className={`${styles.mobileSubmenuLink} ${
+                      isSubActive ? styles.mobileSubmenuLinkActive : ''
+                    }`}
+                  >
+                    {sub.label}
+                  </Link>
+                );
+              })}
             </div>
+          </div>
 
-            {/* ABOUT Section */}
-            <div className={styles.mobileNavSection}>
-              <Link
-                href="/about"
-                onClick={closeMenu}
-                className={`${styles.mobileNavLink} ${
-                  pathname === '/about' ? styles.mobileNavLinkActive : ''
-                }`}
-              >
-                About
-              </Link>
-            </div>
+          {/* ABOUT Section */}
+          <div className={styles.mobileNavSection}>
+            <Link
+              href="/about"
+              onClick={closeMenu}
+              className={`${styles.mobileNavLink} ${
+                pathname === '/about' ? styles.mobileNavLinkActive : ''
+              }`}
+            >
+              About
+            </Link>
+          </div>
 
-            {/* CONTACT Section */}
-            <div className={styles.mobileNavSection}>
-              <Link
-                href="/contact"
-                onClick={closeMenu}
-                className={`${styles.mobileNavLink} ${
-                  pathname === '/contact' ? styles.mobileNavLinkActive : ''
-                }`}
-              >
-                Contact
-              </Link>
-            </div>
-          </nav>
-        </div>
-      )}
+          {/* CONTACT Section */}
+          <div className={styles.mobileNavSection}>
+            <Link
+              href="/contact"
+              onClick={closeMenu}
+              className={`${styles.mobileNavLink} ${
+                pathname === '/contact' ? styles.mobileNavLinkActive : ''
+              }`}
+            >
+              Contact
+            </Link>
+          </div>
+        </nav>
+      </div>
     </header>
   );
 }

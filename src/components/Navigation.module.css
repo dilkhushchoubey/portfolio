@@ -217,7 +217,7 @@
   height: 1.5px;
   background-color: var(--text-primary);
   border-radius: 1px;
-  transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1),
+  transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1),
               opacity 0.2s ease;
   transform-origin: center;
 }
@@ -249,6 +249,7 @@
 
 /* ==========================================================================
    MOBILE NAVIGATION DRAWER OVERLAY (REFINED MINIMAL EDITORIAL)
+   Smooth opening (300ms ease-out) and closing (280ms ease-in) transitions
    ========================================================================== */
 .mobileOverlay {
   position: fixed;
@@ -264,12 +265,48 @@
   padding: 24px var(--gutter-mobile) 36px;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
+
+  /* Closing transition: fades out smoothly over 280ms, hides visibility at end */
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 280ms ease-in,
+              visibility 0s linear 280ms;
+}
+
+/* Opening transition: fades in smoothly over 300ms, visible immediately */
+.mobileOverlayOpen {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transition: opacity 300ms ease-out,
+              visibility 0s linear 0s;
+}
+
+@media (min-width: 769px) {
+  .mobileOverlay {
+    display: none !important;
+  }
 }
 
 .mobileNav {
   display: flex;
   flex-direction: column;
   width: 100%;
+
+  /* Closing transition: fades out and moves slightly up by 10px over 260ms */
+  opacity: 0;
+  transform: translateY(-10px);
+  transition: opacity 260ms ease-in,
+              transform 260ms ease-in;
+}
+
+/* Opening transition: fades in and descends 10px smoothly into place over 300ms */
+.mobileNavOpen {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 300ms ease-out,
+              transform 300ms ease-out;
 }
 
 /* Navigation Sections with thin subtle dividers */
@@ -347,8 +384,12 @@
 @media (prefers-reduced-motion: reduce) {
   .hamburgerBar,
   .mobileOverlay,
+  .mobileOverlayOpen,
+  .mobileNav,
+  .mobileNavOpen,
   .desktopSubmenu {
     transition: none !important;
     animation: none !important;
+    transform: none !important;
   }
 }
