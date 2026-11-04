@@ -87,7 +87,7 @@ export default function EditorialGallery({ photos }: EditorialGalleryProps) {
           openPhoto(photo.id);
         }
       }}
-      aria-label={`Open photograph: ${photo.title || photo.alt}`}
+      aria-label={`Open photograph: ${photo.title || photo.metadata?.location || photo.alt}`}
     >
       <div
         className={styles.imageFrame}
@@ -99,6 +99,7 @@ export default function EditorialGallery({ photos }: EditorialGalleryProps) {
           width={photo.width}
           height={photo.height}
           priority={priority}
+          loading={priority ? 'eager' : 'lazy'}
           className={styles.image}
           sizes="(max-width: 767px) 100vw, (max-width: 1240px) 50vw, 610px"
         />
@@ -113,7 +114,7 @@ export default function EditorialGallery({ photos }: EditorialGalleryProps) {
           {photo.metadata?.location && (
             <span className={styles.metaText}>
               {photo.metadata.location}
-              {photo.metadata.date ? ` · ${photo.metadata.date}` : ''}
+              {(photo.metadata.year || photo.metadata.date) ? ` · ${photo.metadata.year || photo.metadata.date}` : ''}
             </span>
           )}
         </div>
@@ -139,8 +140,12 @@ export default function EditorialGallery({ photos }: EditorialGalleryProps) {
 
       {/* Mobile Single Column Flow (< 768px) */}
       <div className={styles.mobileColumns}>
-        {photos.map((photo, i) =>
-          renderPlate(photo, i === 0, 'mobile')
+        {photos.map((photo) =>
+          renderPlate(
+            photo,
+            photo.id === leftColPhotos[0]?.id || photo.id === rightColPhotos[0]?.id,
+            'mobile'
+          )
         )}
       </div>
 

@@ -9,7 +9,8 @@ const rootDir = path.resolve(__dirname, '..');
 
 const stillsDir = path.join(rootDir, 'public', 'images', 'stills');
 const portraitsDir = path.join(rootDir, 'public', 'images', 'portraits');
-const metadataFile = path.join(rootDir, 'src', 'data', 'galleryMetadata.json');
+const portraitsMetadataFile = path.join(rootDir, 'src', 'data', 'portraitsMetadata.json');
+const stillsMetadataFile = path.join(rootDir, 'src', 'data', 'stillsMetadata.json');
 const generatedDir = path.join(rootDir, 'src', 'data', 'generated');
 
 const SUPPORTED_EXTS = new Set([
@@ -26,11 +27,14 @@ const SUPPORTED_EXTS = new Set([
 ]);
 
 /**
- * Strips priority suffix (e.g. '_1', '_2', '-3') and extension from filename.
+ * Strips priority suffixes (e.g. '_1', '-1', '(1)', ' (1)', '_2', etc.) and extension from filename.
  */
 function getBaseStem(filename) {
   const withoutExt = filename.replace(/\.[^.]+$/, '');
-  return withoutExt.replace(/[_-][1-9]$/, '');
+  return withoutExt
+    .replace(/\s*\([1-9]\)$/, '')
+    .replace(/[_-][1-9]$/, '')
+    .trim();
 }
 
 /**
@@ -51,9 +55,11 @@ function formatFallbackTitle(filename) {
 }
 
 /**
- * Resolves metadata for a given filename using hierarchical lookup.
+ * Resolves metadata for a given filename using hierarchical and case-insensitive lookup.
  */
 function resolveMetadata(filename, registry) {
+  if (!registry || typeof registry !== 'object') return {};
+
   if (registry[filename]) return registry[filename];
 
   const withoutExt = filename.replace(/\.[^.]+$/, '');
@@ -62,9 +68,22 @@ function resolveMetadata(filename, registry) {
   const baseStem = getBaseStem(filename);
   if (registry[baseStem]) return registry[baseStem];
 
-  const lowerBase = baseStem.toLowerCase();
+  const lowerFilename = filename.toLowerCase();
+  const lowerWithoutExt = withoutExt.toLowerCase();
+  const lowerBaseStem = baseStem.toLowerCase();
+
   for (const [key, value] of Object.entries(registry)) {
-    if (key.toLowerCase() === lowerBase) {
+    const lowerKey = key.toLowerCase();
+    const keyWithoutExt = lowerKey.replace(/\.[^.]+$/, '');
+    const keyBaseStem = getBaseStem(key).toLowerCase();
+
+    if (
+      lowerKey === lowerFilename ||
+      lowerKey === lowerWithoutExt ||
+      lowerKey === lowerBaseStem ||
+      keyWithoutExt === lowerWithoutExt ||
+      keyBaseStem === lowerBaseStem
+    ) {
       return value;
     }
   }
@@ -88,13 +107,13 @@ function computeAspectRatio(width, height) {
 
 /**
  * Extracts hierarchy priority for gallery items:
- * 1: suffix 1 (_1, -1)
- * 2: suffix 2 (_2, -2)
- * 3: suffix 3 (_3, -3)
+ * 1: suffix 1 (_1, -1, (1))
+ * 2: suffix 2 (_2, -2, (2))
+ * 3: suffix 3 (_3, -3, (3))
  * 4: no numeric suffix
  */
 export function getFilenamePriority(filename) {
-  const match = filename.match(/[_-](\d+)\.[^.]+$/);
+  const match = filename.match(/(?:[_-]|\s*\(|\()([1-9])\)?\.[^.]+$/);
   if (!match) return 4;
   const num = parseInt(match[1], 10);
   if (num === 1) return 1;
@@ -235,8 +254,15 @@ async function processGalleryFolder(folderName, folderPath, registry) {
 
     const webSrc = ensureWebCompatible(folderName, filename);
     const meta = resolveMetadata(filename, registry);
-    const title = meta.title || formatFallbackTitle(filename);
-    const alt = meta.alt || `${title} — Photograph by Dilkhush Choubey`;
+    const title = meta.title;
+    const year = meta.year || meta.date;
+    const alt =
+      meta.alt ||
+      (title
+        ? `${title} — Photograph by Dilkhush Choubey`
+        : meta.location
+          ? `${meta.location} — Photograph by Dilkhush Choubey`
+          : `${formatFallbackTitle(filename)} — Photograph by Dilkhush Choubey`);
     const fileStem = filename.replace(/\.[^.]+$/, '').toLowerCase().replace(/[^a-z0-9]+/g, '-');
     const cleanId = `${folderName.slice(0, -1)}-${fileStem}`;
 
@@ -245,18 +271,21 @@ async function processGalleryFolder(folderName, folderPath, registry) {
       src: webSrc,
       originalFilename: filename,
       alt,
-      title,
       aspectRatio: computeAspectRatio(width, height),
       width,
       height,
       rank: i + 1,
     };
 
-    if (meta.location || meta.date || meta.notes) {
+    if (title) {
+      photo.title = title;
+    }
+
+    if (meta.location || year || meta.notes) {
       photo.metadata = {
-        location: meta.location,
-        date: meta.date,
-        notes: meta.notes,
+        ...(meta.location ? { location: meta.location } : {}),
+        ...(year ? { year: year, date: year } : {}),
+        ...(meta.notes ? { notes: meta.notes } : {}),
       };
     }
 
@@ -292,6 +321,20 @@ async function processGalleryFolder(folderName, folderPath, registry) {
 }
 
 /**
+ * Loads JSON metadata registry file safely.
+ */
+function loadJsonRegistry(filePath) {
+  if (fs.existsSync(filePath)) {
+    try {
+      return JSON.parse(fs.readFileSync(filePath, 'utf8'));
+    } catch (err) {
+      console.warn(`[sync-galleries] Warning: could not parse ${filePath}:`, err.message);
+    }
+  }
+  return {};
+}
+
+/**
  * Main synchronisation function for Portraits and Stills galleries.
  */
 export async function syncGalleries() {
@@ -299,29 +342,23 @@ export async function syncGalleries() {
     fs.mkdirSync(generatedDir, { recursive: true });
   }
 
-  let registry = {};
-  if (fs.existsSync(metadataFile)) {
-    try {
-      registry = JSON.parse(fs.readFileSync(metadataFile, 'utf8'));
-    } catch (err) {
-      console.warn(`[sync-galleries] Warning: could not parse ${metadataFile}:`, err.message);
-    }
-  }
+  const stillsRegistry = loadJsonRegistry(stillsMetadataFile);
+  const portraitsRegistry = loadJsonRegistry(portraitsMetadataFile);
 
-  // 1. Process Stills
+  // 1. Process Stills with stillsMetadata.json
   const stills = await processGalleryFolder(
     'stills',
     stillsDir,
-    registry
+    stillsRegistry
   );
   const stillsManifestPath = path.join(generatedDir, 'stills.manifest.json');
   fs.writeFileSync(stillsManifestPath, JSON.stringify(stills, null, 2), 'utf8');
 
-  // 2. Process Portraits
+  // 2. Process Portraits with portraitsMetadata.json
   const portraits = await processGalleryFolder(
     'portraits',
     portraitsDir,
-    registry
+    portraitsRegistry
   );
   const portraitsManifestPath = path.join(generatedDir, 'portraits.manifest.json');
   fs.writeFileSync(portraitsManifestPath, JSON.stringify(portraits, null, 2), 'utf8');
@@ -337,7 +374,6 @@ export async function syncGalleries() {
  * Continuous watcher for development mode.
  */
 export function watchGalleries() {
-  const dirs = [stillsDir, portraitsDir, path.dirname(metadataFile)];
   let timeout = null;
 
   const triggerSync = (eventType, filename) => {
@@ -360,8 +396,10 @@ export function watchGalleries() {
     }
   }
 
-  if (fs.existsSync(metadataFile)) {
-    watchers.push(fs.watch(metadataFile, triggerSync));
+  for (const mf of [portraitsMetadataFile, stillsMetadataFile]) {
+    if (fs.existsSync(mf)) {
+      watchers.push(fs.watch(mf, triggerSync));
+    }
   }
 
   console.log(`[watch-galleries] Watching stills and portraits for live folder updates...`);

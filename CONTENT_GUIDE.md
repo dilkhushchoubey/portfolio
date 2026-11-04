@@ -171,7 +171,7 @@ Portraits are **automatically discovered and synchronized** from the filesystem,
 4. **Optional: Curate Titles, Locations & Dates:**
    To add or edit titles, locations, and dates for portraits, open:
    ```text
-   src/data/galleryMetadata.json
+   src/data/portraitsMetadata.json
    ```
    Add or update the entry keyed by base stem (e.g. `DSCF9774`):
    ```json
@@ -204,7 +204,7 @@ Stills are **automatically discovered and synchronized** from the filesystem, ho
    Within each priority tier, photographs sort naturally by filename.
 
 3. **Optional: Curate Titles, Locations & Dates:**
-   In `src/data/galleryMetadata.json`, add an entry using the base stem (e.g. `IMG_0091`):
+   In `src/data/stillsMetadata.json`, add an entry using the base stem (e.g. `IMG_0091`):
    ```json
    "IMG_0091": {
      "title": "Monsoon Over Howrah",

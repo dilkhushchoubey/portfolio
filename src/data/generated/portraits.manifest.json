@@ -3,15 +3,15 @@
     "id": "portrait-dscf9774-1",
     "src": "/images/portraits/DSCF9774_1.jpg",
     "originalFilename": "DSCF9774_1.jpg",
-    "alt": "Portrait Study I — Photograph by Dilkhush Choubey",
-    "title": "Portrait Study I",
+    "alt": "Nagpur, India — Photograph by Dilkhush Choubey",
     "aspectRatio": "3:2",
     "width": 3587,
     "height": 2391,
     "rank": 1,
     "metadata": {
-      "location": "Varanasi, India",
-      "date": "2023"
+      "location": "Nagpur, India",
+      "year": "2026",
+      "date": "2026"
     },
     "column": "left"
   },
@@ -19,48 +19,46 @@
     "id": "portrait-img-9805-1",
     "src": "/images/portraits/IMG_9805_1.jpg",
     "originalFilename": "IMG_9805_1.jpg",
-    "alt": "Incense and Devotion — Photograph by Dilkhush Choubey",
-    "title": "Incense and Devotion",
+    "alt": "Varanasi, India — Photograph by Dilkhush Choubey",
     "aspectRatio": "3:4",
     "width": 1536,
     "height": 2048,
     "rank": 2,
     "metadata": {
       "location": "Varanasi, India",
-      "date": "2024",
-      "notes": "Sanctum dhoop offering sending prayer plumes into the evening dusk."
+      "year": "2025",
+      "date": "2025"
     },
     "column": "right"
   },
   {
-    "id": "portrait-img-1119-2",
-    "src": "/images/portraits/IMG_1119_2.jpg",
-    "originalFilename": "IMG_1119_2.jpg",
-    "alt": "Sacred Garland — Photograph by Dilkhush Choubey",
-    "title": "Sacred Garland",
+    "id": "portrait-img-4365-2",
+    "src": "/images/portraits/IMG_4365_2.JPG",
+    "originalFilename": "IMG_4365_2.JPG",
+    "alt": "Gujarat, India — Photograph by Dilkhush Choubey",
     "aspectRatio": "3:4",
-    "width": 3024,
-    "height": 4032,
+    "width": 4108,
+    "height": 5477,
     "rank": 3,
     "metadata": {
-      "location": "Mumbai, India",
-      "date": "2024",
-      "notes": "Devotional portrait during the traditional immersion rites."
+      "location": "Gujarat, India",
+      "year": "2025",
+      "date": "2025"
     },
     "column": "left"
   },
   {
-    "id": "portrait-img-4365",
-    "src": "/images/portraits/IMG_4365.JPG",
-    "originalFilename": "IMG_4365.JPG",
-    "alt": "Portrait Study II — Photograph by Dilkhush Choubey",
-    "title": "Portrait Study II",
+    "id": "portrait-img-1119",
+    "src": "/images/portraits/IMG_1119.jpg",
+    "originalFilename": "IMG_1119.jpg",
+    "alt": "India — Photograph by Dilkhush Choubey",
     "aspectRatio": "3:4",
-    "width": 4108,
-    "height": 5477,
+    "width": 3024,
+    "height": 4032,
     "rank": 4,
     "metadata": {
-      "location": "Pushkar, Rajasthan",
+      "location": "India",
+      "year": "2024",
       "date": "2024"
     },
     "column": "right"

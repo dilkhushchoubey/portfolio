@@ -27,7 +27,8 @@ export default function PhotographViewer({
   hasNext = false,
 }: PhotographViewerProps) {
   const meta = photo.metadata;
-  const hasMeta = meta && (meta.location || meta.date || meta.time || meta.notes);
+  const yearOrDate = meta?.year || meta?.date;
+  const hasMeta = meta && (meta.location || yearOrDate || meta.time || meta.notes);
   const shouldRenderModal = isModal || Boolean(onClose);
 
   // Keyboard navigation & body scroll lock
@@ -75,30 +76,45 @@ export default function PhotographViewer({
         />
       </div>
 
-      {(photo.title || hasMeta) && (
-        <figcaption className={shouldRenderModal ? styles.modalCaptionBar : styles.captionBar}>
-          {photo.title ? <span className={styles.photoTitle}>{photo.title}</span> : <span />}
-
-          {hasMeta && (
+      {shouldRenderModal ? (
+        (meta?.location || yearOrDate) && (
+          <figcaption className={styles.modalCaptionBar}>
+            <span />
             <div className={styles.metadata}>
-              {meta.location && <span className={styles.metaItem}>{meta.location}</span>}
-              {meta.location && (meta.date || meta.time) && (
+              {meta?.location && <span className={styles.metaItem}>{meta.location}</span>}
+              {meta?.location && yearOrDate && (
                 <span className={styles.separator}>·</span>
               )}
-              {meta.date && <span className={styles.metaItem}>{meta.date}</span>}
-              {meta.date && meta.time && <span className={styles.separator}>·</span>}
-              {meta.time && <span className={styles.metaItem}>{meta.time}</span>}
-              {meta.notes && (
-                <>
-                  {(meta.location || meta.date || meta.time) && (
-                    <span className={styles.separator}>·</span>
-                  )}
-                  <span className={styles.metaItem}>{meta.notes}</span>
-                </>
-              )}
+              {yearOrDate && <span className={styles.metaItem}>{yearOrDate}</span>}
             </div>
-          )}
-        </figcaption>
+          </figcaption>
+        )
+      ) : (
+        (photo.title || hasMeta) && (
+          <figcaption className={styles.captionBar}>
+            {photo.title ? <span className={styles.photoTitle}>{photo.title}</span> : <span />}
+
+            {hasMeta && (
+              <div className={styles.metadata}>
+                {meta.location && <span className={styles.metaItem}>{meta.location}</span>}
+                {meta.location && (yearOrDate || meta.time) && (
+                  <span className={styles.separator}>·</span>
+                )}
+                {yearOrDate && <span className={styles.metaItem}>{yearOrDate}</span>}
+                {yearOrDate && meta.time && <span className={styles.separator}>·</span>}
+                {meta.time && <span className={styles.metaItem}>{meta.time}</span>}
+                {meta.notes && (
+                  <>
+                    {(meta.location || yearOrDate || meta.time) && (
+                      <span className={styles.separator}>·</span>
+                    )}
+                    <span className={styles.metaItem}>{meta.notes}</span>
+                  </>
+                )}
+              </div>
+            )}
+          </figcaption>
+        )
       )}
     </>
   );
@@ -112,7 +128,7 @@ export default function PhotographViewer({
       className={styles.modalOverlay}
       role="dialog"
       aria-modal="true"
-      aria-label={photo.title || 'Photograph Viewer'}
+      aria-label={photo.title || meta?.location || 'Photograph Viewer'}
       onClick={onClose}
     >
       <div className={styles.modalControls}>

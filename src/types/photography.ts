@@ -4,6 +4,7 @@ export type ProjectKind = 'project' | 'series';
 
 export interface PhotographMetadata {
   location?: string;
+  year?: string;
   date?: string;
   time?: string;
   notes?: string;
