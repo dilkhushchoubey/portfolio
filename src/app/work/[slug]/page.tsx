@@ -93,11 +93,6 @@ export default async function ProjectPage({ params }: PageProps) {
       </header>
 
       <section className={styles.gallerySection} aria-label="Photographs in this Work">
-        <div className={styles.galleryHeader}>
-          <span className="meta-stamp">Plates ({project.photographs.length})</span>
-          <span className="meta-stamp">Original Compositions</span>
-        </div>
-
         <div className={styles.galleryList}>
           {project.photographs.map((photo, index) => (
             <PhotographViewer key={photo.id} photo={photo} priority={index === 0} />

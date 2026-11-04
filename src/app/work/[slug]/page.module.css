@@ -1,6 +1,9 @@
 .article {
   display: flex;
   flex-direction: column;
+  width: 100%;
+  max-width: 1140px;
+  margin: 0 auto;
 }
 
 .backLink {
@@ -21,7 +24,7 @@
 }
 
 .header {
-  margin-bottom: 56px;
+  margin-bottom: clamp(32px, 4vw, 48px);
 }
 
 .title {
@@ -95,18 +98,8 @@
 }
 
 .gallerySection {
-  margin-top: 16px;
   display: flex;
   flex-direction: column;
-}
-
-.galleryHeader {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  border-bottom: 1px solid var(--border-subtle);
-  padding-bottom: 12px;
-  margin-bottom: 48px;
 }
 
 .footerNav {
@@ -133,7 +126,7 @@
 
 @media (max-width: 640px) {
   .header {
-    margin-bottom: 40px;
+    margin-bottom: 32px;
   }
 
   .title {
@@ -142,10 +135,6 @@
 
   .statementPara {
     font-size: 1.05rem;
-  }
-
-  .galleryHeader {
-    margin-bottom: 36px;
   }
 
   .statementSection {

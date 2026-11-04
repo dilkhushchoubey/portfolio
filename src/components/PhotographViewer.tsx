@@ -71,7 +71,7 @@ export default function PhotographViewer({
           sizes={
             shouldRenderModal
               ? '(max-width: 1200px) 94vw, 1360px'
-              : '(max-width: 900px) 100vw, 1360px'
+              : '(max-width: 1140px) 100vw, 1140px'
           }
         />
       </div>
