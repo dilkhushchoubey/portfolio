@@ -9,8 +9,8 @@ export const projectsData: Project[] = [
     year: '2026–',
     location: 'Kumartuli, Kolkata, India',
     statement: [
-      'A photographic series documenting the traditional clay idol artisans of Kumartuli along the Hooghly river in northern Kolkata.',
-      'Over the months leading to Durga Puja, raw clay, straw, and bamboo are shaped into sacred forms through generations of hereditary craftsmanship.',
+      'In the narrow lanes and crowded workshops of Kumartuli, everyday life unfolds alongside figures that are slowly taking shape and will eventually be worshipped. Generations of artisans work with clay, straw, bamboo, paint, and simple tools, gradually transforming raw materials into gods and goddesses.',
+      'This project began with a desire to look beyond the finished forms and document the journey behind them. Through these photographs, I wanted to capture the relationship between the makers and the figures they create, along with the spaces, gestures, and quiet moments that define the craft of idol making in Kumartuli.',
     ],
     coverPhotoId: 'kumartuli-01',
     order: 1,
